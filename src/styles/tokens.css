@@ -1,0 +1,137 @@
+/* ==========================================================================
+   KOKPİT — tasarım token'ları
+   Bu dosyadaki değerler Berk'in Claude Design ile yaptığı tasarımdan alındı.
+   Renk/ölçü değiştirmek istediğinde SADECE bu dosyaya dokun.
+   ========================================================================== */
+
+:root {
+  /* --- yüzeyler --- */
+  --bg-root: #08090b;        /* pencere dışı en koyu zemin */
+  --bg: #0b0c0f;             /* uygulama gövdesi */
+  --bg-sidebar: #0e0f13;
+  --bg-topbar: #0d0e12;
+  --surface: #121419;        /* kartlar */
+  --surface-2: #16181e;      /* hover */
+  --surface-3: #191c23;      /* seçili satır */
+  --surface-4: #1c1f26;      /* aktif / ayraç dolgusu */
+  --surface-5: #22262f;      /* seçili sekme */
+  --input-bg: #0e1014;       /* form alanı + kod bloğu */
+  --overlay: #05060899;      /* modal arka planı */
+  --overlay-soft: #05060877;
+
+  /* --- kenarlıklar --- */
+  --line: #1c1f26;           /* bölüm ayracı */
+  --line-soft: #15181e;      /* liste satır ayracı */
+  --border: #23262e;         /* kart kenarı */
+  --border-2: #262a33;       /* rozet / buton kenarı */
+  --border-3: #2b303a;
+  --border-4: #2f3440;       /* modal kenarı */
+  --border-hover: #343945;
+  --border-strong: #3a3f4a;
+
+  /* --- metin --- */
+  --text: #e7e9ee;
+  --text-2: #cfd3db;
+  --text-3: #9aa0ab;
+  --dim: #8a8f9b;
+  --dim-2: #6f7683;
+  --dim-3: #5d626d;
+  --dim-4: #4e535e;
+  --dim-5: #454b57;
+
+  /* --- vurgu ve durum --- */
+  --accent: #57b6ff;
+  --accent-glow: #57b6ff66;
+  --accent-soft: #9fd6ff;    /* kod metni */
+  --success: #6ee7a8;
+  --warn: #efc770;
+  --danger: #ef7a72;
+  --violet: #b39ddb;
+  --teal: #7fd8d0;
+  --pink: #e0a3c8;
+  --neutral-bar: #3a4050;    /* ikincil grafik çubuğu */
+  --track: #1c1f26;          /* ilerleme çubuğu yatağı */
+
+  /* --- heatmap ölçeği (0 → 4) --- */
+  --heat-0: #171a20;
+  --heat-1: #1d3a4d;
+  --heat-2: #235c78;
+  --heat-3: #2f86ab;
+  --heat-4: var(--accent);
+
+  /* --- modül renkleri: her ekranın kendi kimliği (2026-08-04) ---
+     Tek mavi yerine modül başına bir ton. Ayarlar > Görünüm'den kapatılabilir;
+     kapalıyken hepsi --accent'e döner (aşağıdaki .no-color kuralı). */
+  --c-dashboard: #7cc6ff;
+  --c-watch: #e0a3c8;
+  --c-cyber: #6ee7a8;
+  --c-goals: #efc770;
+  --c-notes: #b39ddb;
+  --c-agenda: #7fd8d0;
+  --c-stats: #f0a58a;
+  --c-settings: #8a9bb5;
+
+  /* Yumuşak dolgular — kart başlıkları ve rozetler için (%10–14 karışım). */
+  --tint-strength: 12%;
+
+  /* --- alan renkleri (siber yol haritası) --- */
+  --area-ag: var(--accent);
+  --area-linux: var(--success);
+  --area-web: var(--warn);
+  --area-exploit: var(--danger);
+  --area-adli: var(--violet);
+  --area-blue: var(--teal);
+  --area-kripto: var(--pink);
+
+  /* --- tipografi --- */
+  --font-ui: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Okunabilirlik için küçük uçtaki boyutlar büyütüldü (2026-08-04).
+     Eski tasarım değerleri yorumda duruyor. */
+  --fs-9: 10.5px;   /* eski 9 */
+  --fs-95: 11px;    /* eski 9.5 */
+  --fs-10: 11.5px;  /* eski 10 */
+  --fs-105: 12px;   /* eski 10.5 */
+  --fs-11: 12px;    /* eski 11 */
+  --fs-115: 12.5px; /* eski 11.5 */
+  --fs-12: 13px;    /* eski 12 */
+  --fs-125: 13.5px; /* eski 12.5 */
+  --fs-13: 14px;    /* eski 13 */
+  --fs-135: 14.5px; /* eski 13.5 */
+  --fs-14: 15px;    /* eski 14 */
+  --fs-15: 16px;    /* eski 15 */
+  --fs-18: 19px;
+  --fs-26: 27px;
+  --fs-30: 31px;
+
+  /* --- ölçü --- */
+  --r-4: 4px;
+  --r-5: 5px;
+  --r-6: 6px;
+  --r-7: 7px;
+  --r-8: 8px;
+  --r-10: 10px;
+  --r-pill: 20px;
+
+  --sidebar-w: 216px;
+  --bar-h: 56px;
+
+  --shadow-modal: 0 24px 70px #000000cc;
+  --shadow-toast: 0 12px 40px #000000aa;
+
+  /* Aktif modülün rengi — router her geçişte bunu günceller. */
+  --view: var(--accent);
+}
+
+/* Renkli modüller kapalıyken her şey tek vurgu rengine düşer. */
+:root.no-color {
+  --c-dashboard: var(--accent);
+  --c-watch: var(--accent);
+  --c-cyber: var(--accent);
+  --c-goals: var(--accent);
+  --c-notes: var(--accent);
+  --c-agenda: var(--accent);
+  --c-stats: var(--accent);
+  --c-settings: var(--accent);
+}

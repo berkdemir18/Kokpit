@@ -1,0 +1,61 @@
+/* v0.7.1 — İzleme: büyük Film/Dizi menüsü ve Trakt onarım şeridi */
+
+.kind-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.kind-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-8);
+  color: var(--text);
+}
+.kind-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.kind-card.is-active {
+  border-color: color-mix(in srgb, var(--c-watch) 55%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c-watch) 12%, transparent), var(--surface) 65%);
+}
+.kind-card__icon {
+  width: 34px; height: 34px;
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-7);
+  font-size: var(--fs-15);
+  color: var(--dim-3);
+  background: var(--input-bg);
+  border: 1px solid var(--border-2);
+}
+.kind-card.is-active .kind-card__icon {
+  color: var(--c-watch);
+  border-color: color-mix(in srgb, var(--c-watch) 40%, transparent);
+}
+.kind-card__main { min-width: 0; flex: 1; }
+.kind-card__label { font-size: var(--fs-135); font-weight: 600; }
+.kind-card__meta { font-family: var(--font-mono); font-size: var(--fs-10); color: var(--dim-3); margin-top: 3px; }
+.kind-card__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-18);
+  font-weight: 600;
+  color: var(--dim-2);
+  flex: none;
+}
+.kind-card.is-active .kind-card__count { color: var(--c-watch); }
+
+.repair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-7);
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+  flex-wrap: wrap;
+}
+.repair__icon { color: var(--warn); font-size: var(--fs-14); }
+.repair__status { font-size: var(--fs-125); color: var(--text-2); }
+
+@media (max-width: 1180px) {
+  .kind-menu { grid-template-columns: 1fr; }
+}

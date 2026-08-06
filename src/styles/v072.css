@@ -1,0 +1,118 @@
+/* v0.7.2 — marka ikonları + İzleme "Geçmiş" akışı (Trakt düzeni) */
+
+/* ---------- marka ---------- */
+.sidebar__mark {
+  width: 20px; height: 20px;
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--view);
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--view) 45%, transparent));
+  transition: color 0.2s ease;
+}
+.nav-item__icon { display: flex; align-items: center; justify-content: center; }
+.topbar__dot { padding: 0; }
+
+/* ---------- Geçmiş: üst gün şeridi ---------- */
+.hist-strip-wrap {
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-8);
+  overflow-x: auto;
+}
+.hist-strip { display: flex; gap: 6px; min-width: max-content; }
+.hist-strip__day {
+  width: 68px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 6px 8px;
+  border-radius: var(--r-7);
+  border: 1px solid transparent;
+  background: var(--input-bg);
+}
+.hist-strip__day.is-empty { opacity: 0.45; }
+.hist-strip__day.is-today {
+  border-color: color-mix(in srgb, var(--c-watch) 55%, transparent);
+  background: color-mix(in srgb, var(--c-watch) 10%, var(--input-bg));
+}
+.hist-strip__mon,
+.hist-strip__dow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-9);
+  color: var(--dim-3);
+}
+.hist-strip__num { font-size: var(--fs-15); font-weight: 600; line-height: 1.1; }
+.hist-strip__day.is-today .hist-strip__num { color: var(--c-watch); }
+.hist-strip__dots { display: flex; gap: 3px; height: 6px; margin-top: 3px; }
+.hist-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--c-watch); }
+
+/* ---------- Geçmiş: gün başlıkları ve kartlar ---------- */
+.hist-daytitle {
+  font-size: var(--fs-15);
+  font-weight: 600;
+  color: var(--text);
+  margin: 6px 0 -4px;
+}
+.hist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.hist-card {
+  display: flex;
+  gap: 0;
+  height: 118px;
+  overflow: hidden;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-8);
+  color: var(--text);
+  padding: 0;
+}
+.hist-card:hover { border-color: color-mix(in srgb, var(--c-watch) 45%, transparent); }
+.hist-card__poster {
+  position: relative;
+  width: 84px;
+  flex: none;
+  overflow: hidden;
+  background: repeating-linear-gradient(135deg, #1a1e26 0 7px, #15181e 7px 14px);
+}
+.hist-card__poster .poster__empty {
+  font-size: var(--fs-9);
+  padding: 6px;
+  text-align: center;
+  letter-spacing: 0;
+}
+.hist-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+}
+.hist-card__title {
+  font-size: var(--fs-125);
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hist-card__show { font-size: var(--fs-11); color: var(--dim-2); }
+.hist-card__date { font-family: var(--font-mono); font-size: var(--fs-10); color: var(--dim-3); }
+.hist-card__foot { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+.hist-card__kind {
+  font-family: var(--font-mono);
+  font-size: var(--fs-9);
+  letter-spacing: 0.08em;
+  color: var(--dim-3);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-4);
+  padding: 2px 5px;
+}
+.hist-card__star { font-family: var(--font-mono); font-size: var(--fs-11); font-weight: 700; margin-left: auto; }
+
+/* ızgara kartında izlenme tarihi */
+.poster-card__watched { font-family: var(--font-mono); font-size: var(--fs-9); color: var(--dim-4); margin-top: 2px; }

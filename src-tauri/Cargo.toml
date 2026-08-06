@@ -1,0 +1,42 @@
+[package]
+name = "kokpit"
+version = "0.8.0"
+description = "Kokpit — kisisel takip uygulamasi"
+authors = ["Berk"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "kokpit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"
+tauri-plugin-notification = "2"
+tauri-plugin-http = "2"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+
+# Toast'i dogrudan kendimiz gonderiyoruz: AUMID'yi secebilmek ve hata
+# durumunda PowerShell kimligine dusebilmek icin (bkz. src/notify.rs).
+[target.'cfg(windows)'.dependencies]
+tauri-winrt-notification = "0.7"
+# WinRT cagrilari cagiran ipligin COM'a girmis olmasini ister; hatirlatici
+# ipligi kendi basina bir std::thread oldugu icin CoInitializeEx gerekiyor.
+windows-sys = { version = "0.61", features = ["Win32_System_Com"] }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
