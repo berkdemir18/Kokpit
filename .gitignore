@@ -1,0 +1,24 @@
+# Bağımlılıklar
+node_modules/
+
+# Derleme çıktıları
+dist/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Derlenmiş uygulama (Releases bölümünden indirilir)
+*.exe
+
+# Yerel veri ve günlükler
+data.json
+src/core/roadmap-data.kisisel.ts
+*.log
+bildirim.log
+bash.exe.stackdump
+
+# Editör / işletim sistemi
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+{
+  "name": "kokpit-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Kokpit verisini (film, dizi, notlar, siber yol haritasi, hedefler, ajanda) yapay zeka asistanlarina salt-okunur acan MCP sunucusu.",
+  "bin": { "kokpit-mcp": "server.js" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/smoke.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
+  }
+}

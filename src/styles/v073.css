@@ -1,0 +1,182 @@
+/* v0.7.5 — ayrı hızlı yakalama penceresi, alarm kartı, tıklanabilir gün şeridi */
+
+/* ---------- hızlı yakalama PENCERESİ (Alt+Q) ---------- */
+body.is-capture-window {
+  background: transparent;
+  overflow: hidden;
+}
+body.is-capture-window #app { display: block; height: 100vh; }
+
+.cw {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-10);
+  overflow: hidden;
+  box-shadow: var(--shadow-modal);
+}
+.cw__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border-bottom: 1px solid var(--line);
+  /* Çerçevesiz pencere: başlıktan tutup sürüklenebilsin. */
+  -webkit-app-region: drag;
+  user-select: none;
+}
+.cw__dot { width: 7px; height: 7px; background: var(--accent); border-radius: 2px; flex: none; }
+.cw__brand {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.14em;
+  color: var(--dim);
+}
+.cw__close {
+  -webkit-app-region: no-drag;
+  width: 22px; height: 22px;
+  border-radius: var(--r-5);
+  background: none;
+  color: var(--dim-3);
+  font-size: var(--fs-15);
+  line-height: 1;
+}
+.cw__close:hover { background: var(--surface-3); color: var(--danger); }
+
+.cw__tabs { display: flex; gap: 3px; padding: 9px 10px 0; }
+.cw__tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: var(--r-6);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--dim-3);
+  background: none;
+}
+.cw__tab:hover { color: var(--text-2); background: var(--surface-2); }
+.cw__tab.is-active { color: var(--bg-root); background: var(--accent); font-weight: 600; }
+.cw__tabkey {
+  font-family: var(--font-mono);
+  font-size: var(--fs-9);
+  opacity: 0.55;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.cw__input {
+  flex: 1;
+  margin: 10px 12px 0;
+  padding: 11px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-7);
+  color: var(--text);
+  font-size: var(--fs-14);
+  line-height: 1.6;
+  outline: none;
+  resize: none;
+}
+.cw__input:focus { border-color: var(--accent); }
+
+.cw__when { display: flex; align-items: center; gap: 7px; padding: 9px 12px 0; flex-wrap: wrap; }
+.cw__chips { display: flex; gap: 6px; padding: 9px 12px 0; flex-wrap: wrap; }
+.cw__chip {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+}
+button.cw__chip:hover { color: var(--text); border-color: var(--border-strong); }
+.cw__chip--time {
+  color: var(--c-agenda);
+  background: color-mix(in srgb, var(--c-agenda) 12%, transparent);
+  border-color: color-mix(in srgb, var(--c-agenda) 30%, transparent);
+}
+.cw__time,
+.cw__repeat {
+  background: var(--input-bg);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-5);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-105);
+  padding: 4px 7px;
+  outline: none;
+}
+
+.cw__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.cw__hint, .cw__keys { font-family: var(--font-mono); font-size: var(--fs-9); color: var(--dim-4); }
+.cw__send {
+  padding: 7px 16px;
+  border-radius: var(--r-6);
+  background: var(--accent);
+  color: var(--bg-root);
+  font-size: var(--fs-125);
+  font-weight: 600;
+  flex: none;
+}
+.cw__send:hover { filter: brightness(1.08); }
+
+/* ---------- alarm kartı (toast görünmese de bu çıkar) ---------- */
+.alarm {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 330px;
+  z-index: 80;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--c-agenda) 45%, var(--border-4));
+  border-radius: var(--r-10);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  animation: kokpit-pop 0.16s ease-out;
+}
+.alarm__head { display: flex; gap: 11px; padding: 14px 14px 10px; }
+.alarm__bell { font-size: var(--fs-18); flex: none; }
+.alarm__title { font-size: var(--fs-135); font-weight: 600; line-height: 1.35; }
+.alarm__note { font-size: var(--fs-115); color: var(--dim-2); margin-top: 3px; }
+.alarm__x { background: none; color: var(--dim-3); font-size: var(--fs-15); flex: none; align-self: flex-start; }
+.alarm__x:hover { color: var(--text); }
+.alarm__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- geçmiş: tıklanabilir gün şeridi ---------- */
+.hist-strip__day { cursor: pointer; transition: border-color 0.12s ease, background 0.12s ease; }
+.hist-strip__day:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.hist-strip__day.is-picked {
+  border-color: var(--c-watch);
+  background: color-mix(in srgb, var(--c-watch) 16%, var(--input-bg));
+}
+.hist-strip__day.is-picked .hist-strip__num { color: var(--c-watch); }
+.hist-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border-radius: var(--r-7);
+  font-size: var(--fs-125);
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--c-watch) 9%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--c-watch) 30%, transparent);
+}

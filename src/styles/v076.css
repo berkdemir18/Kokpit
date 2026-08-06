@@ -1,0 +1,279 @@
+/* v0.7.8 — Notion tarzı not sayfası + yakalanan görev kutusu */
+
+/* ============================ NOT SAYFASI ============================ */
+
+/* Sayfa kenar boşluğunu kapak tam kaplayabilsin diye üst dolgu sıfırlandı;
+   içerik kendi iç dolgusunu taşıyor. */
+.note-page { padding: 0 0 18px; overflow: hidden; }
+.note-page--empty { padding: 26px 32px; }
+.note-page__head { padding: 0 40px; }
+.note-page .note-body { margin-left: 40px; margin-right: 40px; }
+.note-page .note-editor { padding: 0 40px; }
+.note-page .note-editor .note-body { margin-left: 0; margin-right: 0; }
+.note-page__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 40px 0;
+  margin-top: auto;
+}
+
+/* ---------- kapak ---------- */
+.note-cover {
+  position: relative;
+  height: 18px;
+  background: var(--surface-2);
+  transition: height 0.14s ease;
+}
+.note-cover.is-on { height: 104px; }
+.note-cover__picker {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.note-cover:hover .note-cover__picker { opacity: 1; }
+.note-cover__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-5);
+  border: 1px solid #00000055;
+  box-shadow: 0 1px 4px #00000066;
+  background: none;
+}
+.note-cover__swatch.is-on { outline: 2px solid var(--text); outline-offset: 1px; }
+.note-cover__clear {
+  font-family: var(--font-mono);
+  font-size: var(--fs-9);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: #00000066;
+  border: 1px solid #ffffff22;
+  border-radius: var(--r-5);
+  padding: 3px 8px;
+}
+.note-cover__clear:hover { background: #000000aa; }
+
+/* ---------- başlık satırı + emoji ---------- */
+.note-page__titlerow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+.note-emoji {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  margin-top: -2px;
+  border-radius: var(--r-8);
+  background: none;
+  border: 1px solid transparent;
+  font-size: 30px;
+  line-height: 1;
+}
+.note-emoji:hover { background: var(--surface-2); border-color: var(--border); }
+
+/* Kapak varken simge Notion'daki gibi kapağın alt kenarına biner, başlık
+   simgenin altından tam genişlikte başlar. */
+.note-cover.is-on + .note-page__head .note-page__titlerow { padding-top: 26px; }
+.note-cover.is-on + .note-page__head .note-emoji {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  margin: 0;
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.note-page__icons { align-items: center; gap: 5px; padding-top: 0; }
+
+.emoji-pop {
+  position: absolute;
+  top: 62px;
+  left: 0;
+  z-index: 30;
+  width: 268px;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-4);
+  border-radius: var(--r-8);
+  box-shadow: var(--shadow-modal);
+  animation: kokpit-pop 0.1s ease-out;
+}
+.emoji-pop__item {
+  width: 34px;
+  height: 30px;
+  border-radius: var(--r-5);
+  font-size: 17px;
+  background: none;
+  line-height: 1;
+}
+.emoji-pop__item:hover { background: var(--surface-4); }
+.emoji-pop__clear {
+  width: 100%;
+  margin-top: 4px;
+  padding: 5px;
+  border-radius: var(--r-5);
+  font-family: var(--font-mono);
+  font-size: var(--fs-9);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim-2);
+  background: none;
+}
+.emoji-pop__clear:hover { color: var(--danger); background: var(--surface-4); }
+
+/* ---------- yapılacak ilerlemesi ---------- */
+.note-todobar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.note-todobar__track {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+.note-todobar__fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--c-notes);
+  transition: width 0.18s ease;
+}
+.note-todobar__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-95);
+  color: var(--dim-2);
+  flex: none;
+}
+
+/* ---------- sol liste zenginleştirmesi ---------- */
+.note-item__icon { font-size: 14px; color: inherit; }
+.note-item__meta { display: flex; align-items: center; gap: 8px; }
+.note-item__todo {
+  flex: none;
+  padding: 1px 5px;
+  border-radius: var(--r-4);
+  background: var(--surface-4);
+  color: var(--c-notes);
+}
+.note-item__todo.is-done { color: var(--success); }
+
+.notes-foot {
+  display: flex;
+  gap: 6px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--line-soft);
+}
+.notes-tpl {
+  flex: 1;
+  padding: 7px 8px;
+  border-radius: var(--r-6);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: var(--fs-105);
+  border: 1px solid var(--line);
+}
+.notes-tpl:hover { background: var(--surface-4); color: var(--text); border-color: var(--border-hover); }
+
+/* ---------- okuma görünümü (Notion sayfası gibi) ---------- */
+.note-md--read {
+  font-family: var(--font-ui);
+  font-size: var(--fs-135);
+  line-height: 1.75;
+  cursor: text;
+}
+.note-md--read [data-line] { border-radius: var(--r-5); }
+.note-md--read p:hover,
+.note-md--read h1:hover,
+.note-md--read h2:hover,
+.note-md--read h3:hover,
+.note-md--read blockquote:hover { background: var(--surface-2); }
+.note-md--read h1 { font-size: 26px; font-weight: 700; margin: 22px 0 8px; color: var(--text); }
+.note-md--read h2 { font-size: 20px; font-weight: 600; margin: 20px 0 6px; color: var(--text); }
+.note-md--read h3 { font-size: 16px; font-weight: 600; margin: 16px 0 4px; color: var(--text); }
+.note-md--read h1:first-child, .note-md--read h2:first-child { margin-top: 0; }
+.note-md--read p { margin: 0 0 8px; }
+.note-md--read li { margin: 3px 0; }
+.note-md--read pre { font-family: var(--font-mono); font-size: var(--fs-12); }
+.note-md--read code { font-family: var(--font-mono); font-size: var(--fs-115); }
+.note-md__placeholder { color: var(--dim-3); }
+
+.note-md mark {
+  background: color-mix(in srgb, var(--warn) 26%, transparent);
+  color: var(--text);
+  border-radius: var(--r-4);
+  padding: 0 3px;
+}
+
+/* yapılacak: daha büyük, tıklanabilir kutu + girinti seviyeleri */
+.note-md--read .md-todo { padding: 4px 0; }
+.note-md--read .md-todo__box {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  cursor: pointer;
+}
+.note-md--read .md-todo__box:hover { border-color: var(--c-notes); background: var(--surface-4); }
+.note-md--read .md-todo.is-done .md-todo__box:hover { background: var(--success); }
+.md-todo[data-indent="1"] { padding-left: 24px; }
+.md-todo[data-indent="2"] { padding-left: 48px; }
+.md-todo[data-indent="3"] { padding-left: 72px; }
+
+/* bilgi kutusu */
+.md-callout {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: var(--r-7);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  line-height: 1.6;
+}
+.md-callout__icon { flex: none; font-size: 15px; line-height: 1.4; }
+.md-callout__body b {
+  font-family: var(--font-mono);
+  font-size: var(--fs-95);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim-2);
+  margin-right: 6px;
+}
+.md-callout--uyarı { border-color: color-mix(in srgb, var(--warn) 45%, var(--border)); }
+.md-callout--uyarı .md-callout__body b { color: var(--warn); }
+.md-callout--önemli { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.md-callout--önemli .md-callout__body b { color: var(--danger); }
+.md-callout--yapıldı { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); }
+.md-callout--yapıldı .md-callout__body b { color: var(--success); }
+.md-callout--bilgi .md-callout__body b,
+.md-callout--ipucu .md-callout__body b { color: var(--accent); }
+
+/* ==================== SİBER: YAKALANAN GÖREVLER ==================== */
+
+.capture-inbox { border-color: color-mix(in srgb, var(--c-notes) 40%, var(--border)); }
+.capture-inbox__list { padding: 4px 0 6px; }
+.capture-inbox__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.capture-inbox__row:last-child { border-bottom: 0; }
+.capture-inbox__main { flex: 1; min-width: 0; }
+.capture-inbox__title { font-size: var(--fs-125); color: var(--text); }

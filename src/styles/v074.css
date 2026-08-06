@@ -1,0 +1,174 @@
+/* v0.7.6 — Android tarzı gün + saat seçici (yerli datetime-local yerine) */
+
+.cw__picker { padding: 0 12px; }
+.cw__picker:empty { display: none; }
+.cw__chipEdit { margin-left: 4px; opacity: 0.7; }
+button.cw__chip--time { cursor: pointer; }
+button.cw__chip--time:hover { border-color: var(--c-agenda); }
+
+.wp {
+  margin-top: 9px;
+  padding: 11px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-8);
+  animation: kokpit-pop 0.12s ease-out;
+}
+
+.wp__summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 9px;
+  margin-bottom: 9px;
+  border-bottom: 1px solid var(--line);
+}
+.wp__sumDay { font-size: var(--fs-12); color: var(--text-2); }
+.wp__sumTime {
+  font-family: var(--font-mono);
+  font-size: var(--fs-18);
+  font-weight: 600;
+  color: var(--c-agenda);
+}
+
+/* ---------- gün şeridi ---------- */
+.wp__days { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px; }
+.wp__day {
+  flex: none;
+  width: 46px;
+  padding: 6px 2px;
+  border-radius: var(--r-6);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--dim);
+}
+.wp__day:hover { border-color: var(--border-strong); color: var(--text-2); }
+.wp__day.is-on {
+  background: color-mix(in srgb, var(--c-agenda) 18%, var(--surface));
+  border-color: var(--c-agenda);
+  color: var(--text);
+}
+.wp__dayName { font-family: var(--font-mono); font-size: var(--fs-9); }
+.wp__dayNum { font-size: var(--fs-135); font-weight: 600; line-height: 1.25; }
+.wp__day--more .wp__dayNum { font-size: var(--fs-12); }
+
+/* ---------- takvim ---------- */
+.wp__calwrap {
+  margin-top: 9px;
+  padding: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-7);
+}
+.wp__calhead { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 7px; }
+.wp__calmon { font-family: var(--font-mono); font-size: var(--fs-115); color: var(--text-2); min-width: 76px; text-align: center; }
+.wp__calnav { width: 22px; height: 22px; border-radius: var(--r-5); background: none; color: var(--dim); font-size: var(--fs-14); }
+.wp__calnav:hover { background: var(--surface-3); color: var(--text); }
+.wp__cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.wp__caldow { text-align: center; font-family: var(--font-mono); font-size: var(--fs-9); color: var(--dim-4); padding-bottom: 3px; }
+.wp__calday {
+  aspect-ratio: 1;
+  border-radius: var(--r-5);
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+.wp__calday:hover { background: var(--surface-3); }
+.wp__calday.is-out { opacity: 0.32; }
+.wp__calday.is-today { color: var(--c-agenda); }
+.wp__calday.is-on { background: var(--c-agenda); color: var(--bg-root); font-weight: 700; }
+
+/* ---------- saat/dakika tekerleri ---------- */
+.wp__wheels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 11px;
+}
+.wp__col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.wp__colon {
+  font-family: var(--font-mono);
+  font-size: var(--fs-18);
+  color: var(--dim-3);
+  align-self: center;
+  padding-bottom: 16px;
+}
+.wp__collabel { font-family: var(--font-mono); font-size: var(--fs-9); color: var(--dim-4); }
+.wp__step {
+  width: 46px;
+  height: 18px;
+  border-radius: var(--r-4);
+  background: none;
+  color: var(--dim-3);
+  font-size: var(--fs-9);
+}
+.wp__step:hover { background: var(--surface-3); color: var(--c-agenda); }
+
+/* Teker: ortadaki değer seçili. Üst/alt kenarlar solar. */
+.wp__wheel {
+  position: relative;
+  width: 62px;
+  height: 108px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-6);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+}
+.wp__wheel::-webkit-scrollbar { display: none; }
+.wp__pad { height: 38px; flex: none; }
+.wp__cell {
+  display: block;
+  width: 100%;
+  height: 32px;
+  scroll-snap-align: center;
+  background: none;
+  border: 0;
+  color: var(--dim-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-15);
+  line-height: 32px;
+}
+.wp__cell:hover { color: var(--text); }
+.wp__cell.is-on {
+  color: var(--c-agenda);
+  font-weight: 700;
+  font-size: var(--fs-18);
+}
+
+/* ---------- hazır saatler ---------- */
+.wp__presets { display: flex; gap: 6px; margin-top: 11px; flex-wrap: wrap; }
+.wp__preset {
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--dim);
+  font-size: var(--fs-11);
+}
+.wp__preset b { font-family: var(--font-mono); color: var(--text-2); }
+.wp__preset:hover { border-color: var(--border-strong); }
+.wp__preset.is-on { border-color: var(--c-agenda); color: var(--text); }
+.wp__preset.is-on b { color: var(--c-agenda); }
+
+.wp__foot { display: flex; align-items: center; gap: 8px; margin-top: 11px; }
+.wp__ok {
+  padding: 6px 16px;
+  border-radius: var(--r-6);
+  background: var(--c-agenda);
+  color: var(--bg-root);
+  font-size: var(--fs-125);
+  font-weight: 600;
+}
+.wp__ok:hover { filter: brightness(1.08); }
+
+/* Seçici açıkken metin kutusu küçülsün, pencereye sığsın. */
+.cw.is-picking .cw__input { flex: none; height: 58px; }
+.cw.is-picking .cw__chips { display: none; }
+.cw__picker { flex: none; overflow-y: auto; }
