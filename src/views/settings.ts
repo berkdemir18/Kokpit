@@ -12,6 +12,7 @@ import { importTraktExport } from '../core/trakt-import';
 import { syncGoogleCalendar, addReminder } from '../core/reminders';
 import { navigate, VIEWS } from '../core/router';
 import { chime } from '../core/alarm';
+import { openOnboarding } from '../ui/onboarding';
 
 const ACCENTS: [string, string][] = [
   ['#57b6ff', 'mavi'],
@@ -404,6 +405,12 @@ function hotkeysCard(): HTMLElement {
       ),
     );
   }
+  card.append(
+    h('div', { class: 'row', style: { gap: '12px', padding: '12px 16px' } },
+      h('button', { class: 'btn', text: 'Öğreticiyi göster', onclick: () => openOnboarding() }),
+      h('div', { style: { fontSize: '12px', color: 'var(--dim-3)' }, text: 'İlk açılıştaki tanıtım turunu tekrar açar.' }),
+    ),
+  );
   return card;
 }
 

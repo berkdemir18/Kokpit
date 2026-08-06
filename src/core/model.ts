@@ -338,6 +338,13 @@ export interface Settings {
   notifyLeadMin: number;
   /** Renkli modül vurguları (kapatılırsa tek renk temaya döner). */
   colorfulModules: boolean;
+  /**
+   * İlk açılış öğreticisi gösterildi mi. Varsayılan `true`; öğretici yalnızca
+   * `seedDB()` bunu `false` yaptığı temiz kurulumda açılır. Böylece daha önce
+   * kurulmuş bir veri dosyası (alanı içermez → varsayılanı alır) güncellemeden
+   * sonra turu tekrar görmez.
+   */
+  onboarded: boolean;
 }
 
 export interface DB {
@@ -372,6 +379,7 @@ export const DEFAULT_SETTINGS: Settings = {
   notifyEnabled: true,
   notifyLeadMin: 0,
   colorfulModules: true,
+  onboarded: true,
 };
 
 export function emptyDB(): DB {

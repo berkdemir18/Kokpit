@@ -163,5 +163,8 @@ export function seedDB(): DB {
 
   db.events = [];
 
+  /* Temiz kurulum: ilk açılışta öğretici turu gösterilsin. */
+  db.settings.onboarded = false;
+
   return db;
 }

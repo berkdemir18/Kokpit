@@ -10,6 +10,7 @@ import './styles/v074.css';
 import './styles/v075.css';
 import './styles/v076.css';
 import './styles/v08.css';
+import './styles/onboarding.css';
 
 import { store, db } from './core/store';
 import { seedDB, buildRoadmap } from './core/seed';
@@ -20,6 +21,7 @@ import { capturePrompt, toast, anyOverlayOpen, closeOverlay, alarmCard, CaptureR
 import { mountCaptureWindow } from './ui/capture-window';
 import { chime, primeAudio } from './core/alarm';
 import { openPalette } from './ui/palette';
+import { openOnboarding } from './ui/onboarding';
 import { addNoteToInbox } from './views/notes';
 import { addRoadmapTask, revealCapturedTasks } from './views/cyber';
 import { addReminder, startScheduler, completeReminder, updateReminder, syncNative } from './core/reminders';
@@ -198,6 +200,16 @@ async function main(): Promise<void> {
 
   renderAll();
   await refreshInfo();
+
+  // İlk açılış öğreticisi: yalnız temiz kurulumda açılır (seedDB `onboarded`ı
+  // false yazar). Mevcut veri dosyası olanlar varsayılan `true`yu alır ve turu
+  // görmez; isteyen Ayarlar'dan tekrar açar.
+  if (store.ready && !db().settings.onboarded) {
+    openOnboarding(() => {
+      store.update((d) => { d.settings.onboarded = true; });
+      void store.flush();
+    });
+  }
 
   // Global kısayol (Tauri): ayrı pencere yoksa eski modal davranışı.
   await api.onQuickCapture(() => void doCapture());

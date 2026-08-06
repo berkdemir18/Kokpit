@@ -39,7 +39,7 @@ export function buildShell(
     h('div', { class: 'sidebar__brand' },
       h('div', { class: 'sidebar__mark' }, icon('brand', 20)),
       h('div', { class: 'sidebar__name', text: 'KOKPİT' }),
-      h('div', { class: 'sidebar__ver', text: 'v0.7' }),
+      h('div', { class: 'sidebar__ver', text: 'v0.8' }),
     ),
     navEl,
     footEl,
@@ -146,7 +146,7 @@ export function renderTopbar(refs: ShellRefs): void {
     cyber: ['Siber Güvenlik', cyberMeta()],
     goals: ['Hedefler & Alışkanlıklar', `${d.habits.filter((h2) => !h2.archived).length} ALIŞKANLIK · ${d.goals.filter((g) => g.status === 'active').length} AÇIK HEDEF`],
     stats: ['İstatistik', 'BİRLEŞİK GÖRÜNÜM · ' + new Date().getFullYear()],
-    settings: ['Ayarlar', 'KOKPİT 0.7 · TAURI 2 · YEREL VERİ'],
+    settings: ['Ayarlar', 'KOKPİT 0.8 · TAURI 2 · YEREL VERİ'],
   };
   const [t, m] = titles[view];
   refs.titleEl.textContent = t;

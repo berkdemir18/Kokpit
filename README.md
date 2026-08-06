@@ -32,6 +32,8 @@ Windows SmartScreen uyarı verirse "Ek bilgi" → "Yine de çalıştır" ile ge�
 
 Uygulama geneli: `Ctrl+K` komut paleti, `Alt+Q` global hızlı yakalama penceresi, sistem tepsisi, atomik veri yazma + otomatik yedek (son 10), Obsidian markdown dışa aktarma.
 
+İlk açılışta dört adımlık bir tanıtım turu çıkar (ne olduğu → günlük kullanım → takip modülleri → kısayollar). Yalnızca temiz kurulumda otomatik açılır; sonradan Ayarlar → Kısayollar → **Öğreticiyi göster** ile tekrar açılabilir.
+
 ## MCP sunucusu
 
 `mcp/` altında, Kokpit verisini yapay zekâ asistanlarına **salt okunur** açan bir MCP (Model Context Protocol) sunucusu bulunur. 11 araç sunar: izleme arama/detay/istatistik, not arama ve okuma, siber ilerleme, komut defteri, hedefler, ajanda, son hareketler. Hiçbir araç veriyi değiştirmez — tek yazıcı Kokpit uygulamasıdır.
