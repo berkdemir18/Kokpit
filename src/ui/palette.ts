@@ -5,7 +5,6 @@ import { buildIndex, search, SearchHit } from '../core/search';
 import { h, clear } from './dom';
 import { closeOverlay, anyOverlayOpen, mountOverlay } from './overlay';
 import { openWatchForm } from '../views/watch';
-import { openLabForm } from '../views/cyber';
 import { openNoteForm } from '../views/notes';
 import { openReminderQuick } from '../views/agenda';
 import { syncGoogleCalendar } from '../core/reminders';
@@ -23,7 +22,6 @@ interface Command {
 
 const COMMANDS: Command[] = [
   { kind: 'KOMUT', label: 'Yeni film / dizi ekle', meta: 'izleme', run: () => { navigate('watch'); openWatchForm(); } },
-  { kind: 'KOMUT', label: 'Yeni lab kaydı ekle', meta: 'siber', run: () => { navigate('cyber'); openLabForm(); } },
   { kind: 'KOMUT', label: 'Yeni not oluştur', meta: 'notlar', run: () => { navigate('notes'); openNoteForm(); } },
   { kind: 'KOMUT', label: 'Yeni hatırlatıcı kur', meta: 'takvim', run: () => { navigate('agenda'); openReminderQuick(); } },
   { kind: 'KOMUT', label: 'Google Takvimi eşitle', meta: 'takvim', run: async () => { try { const s = await syncGoogleCalendar(); toast(`${s.kept} etkinlik alındı`); } catch (e) { toast(String(e instanceof Error ? e.message : e)); } } },
@@ -32,7 +30,6 @@ const COMMANDS: Command[] = [
   { kind: 'GİT', label: 'Bugün', meta: 'ekran', run: () => navigate('dashboard') },
   { kind: 'GİT', label: 'Takvim', meta: 'ekran', run: () => navigate('agenda') },
   { kind: 'GİT', label: 'İzleme', meta: 'ekran', run: () => navigate('watch') },
-  { kind: 'GİT', label: 'Siber', meta: 'ekran', run: () => navigate('cyber') },
   { kind: 'GİT', label: 'Hedefler', meta: 'ekran', run: () => navigate('goals') },
   { kind: 'GİT', label: 'Notlar', meta: 'ekran', run: () => navigate('notes') },
   { kind: 'GİT', label: 'İstatistik', meta: 'ekran', run: () => navigate('stats') },

@@ -18,7 +18,6 @@ Mevcut değerler doğrudan tasarımdan alındı (koyu + camgöbeği neon):
 | Metin | `--text #e7e9ee`, `--text-2 #cfd3db`, `--dim` … `--dim-5` (kademeli gri) |
 | Vurgu/durum | `--accent #57b6ff`, `--success #6ee7a8`, `--warn #efc770`, `--danger #ef7a72` |
 | Heatmap | `--heat-0` … `--heat-4` (5 kademe) |
-| Alan renkleri | `--area-ag/linux/web/exploit/adli/blue/kripto` |
 | Tipografi | `--font-ui` (IBM Plex Sans), `--font-mono` (IBM Plex Mono), `--fs-*` ölçek |
 
 > **Not (2026-08-04):** `--fs-*` ölçeğinin küçük ucu okunabilirlik için ~1–1.5px
@@ -54,7 +53,6 @@ Her sınıf sadece token kullanır. Ana bileşenler ve durumları:
 - **Buton:** `.btn` (`.btn--primary/--ghost/--mono/--block`), `.mini-btn`
 - **Sekme:** `.segmented` (`.segmented__item.is-active`), `.tabs`
 - **İzleme:** `.poster-grid`, `.poster-card`, `.poster` + `__kind/__rating/__ep/__bump`
-- **Siber:** `.heatmap` (`.heatmap--sm`), `.heat-legend`, `.code-block`, `.tree-row`
 - **Not:** `.note-item` (`.is-active`), `.note-body`, `.note-md` (markdown çıktısı)
 - **Grafik:** `.chart`, `.chart__bar` (`--muted`), `.dist-row`
 - **Katman:** `.overlay`, `.modal`, `.palette`, `.capture`, `.toast`, `.empty-state`
@@ -66,20 +64,15 @@ boş (`.empty-state`).
 
 Her modül `src/views/<ad>.ts` içinde; DOM'u `src/ui/dom.ts` `h()` yardımcısıyla kurar.
 
-- **Bugün** (`dashboard.ts`): 4 özet kutusu → hızlı not kutusu → (bugünkü
-  alışkanlıklar | sıradaki yol haritası görevleri). Sadeleştirildi: aktivite
-  grafiği İstatistik ekranında.
+- **Bugün** (`dashboard.ts`): tek satır özet → solda hızlı not kutusu ve son
+  notlar | sağda bugünün ajandası ve alışkanlık listesi.
 - **İzleme** (`watch.ts`): araç çubuğu (durum sekmeleri + filtre çipleri + arama +
   görünüm/ekle) → istatistik şeridi → poster ızgarası **veya** liste tablosu.
   Karta tıklayınca **hızlı detay paneli** açılır (`.detail-body`): 1–10 puan şeridi
   (`.rating-dot`), durum düğmeleri, dizi için sezon/bölüm sayacı, yorum alanı.
   12 alanlı tam form yalnızca "Tüm alanları düzenle" ile açılır.
   Arama yazarken sekme filtresi devre dışı kalır (kayıt hangi sekmedeyse bulunur).
-- **Siber** (`cyber.ts`): tek satır çalışma özeti (heatmap katlanır) → 4 sekme
-  (yol haritası / kaynak kartları / lab tablosu / komut kartları).
-  Yol haritası: `.phase-head` (açılır faz başlığı) + `.task-row` (işaretlenebilir görev).
-  Başlangıç içeriği `core/roadmap-data.ts`'teki örnek fazlardan gelir; kullanıcı
-  kendi fazlarını uygulama içinden yazar.
+
 - **Hedefler** (`goals.ts`): sol alışkanlık kartları (91 günlük mini heatmap) |
   sağ hedef kartları + haftalık özet grafiği.
 - **Notlar** (`notes.ts`): sol not listesi | sağ editör. Sadeleştirildi: ayrı

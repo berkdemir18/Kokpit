@@ -5,7 +5,6 @@ export type ViewId =
   | 'notes'
   | 'agenda'
   | 'watch'
-  | 'cyber'
   | 'goals'
   | 'stats'
   | 'settings';
@@ -24,10 +23,9 @@ export const VIEWS: ViewDef[] = [
   { id: 'notes', label: 'Notlar', num: '02', color: 'var(--c-notes)' },
   { id: 'agenda', label: 'Takvim', num: '03', color: 'var(--c-agenda)' },
   { id: 'watch', label: 'İzleme', num: '04', color: 'var(--c-watch)' },
-  { id: 'cyber', label: 'Siber', num: '05', color: 'var(--c-cyber)' },
-  { id: 'goals', label: 'Hedefler', num: '06', color: 'var(--c-goals)' },
-  { id: 'stats', label: 'İstatistik', num: '07', color: 'var(--c-stats)' },
-  { id: 'settings', label: 'Ayarlar', num: '08', color: 'var(--c-settings)' },
+  { id: 'goals', label: 'Hedefler', num: '05', color: 'var(--c-goals)' },
+  { id: 'stats', label: 'İstatistik', num: '06', color: 'var(--c-stats)' },
+  { id: 'settings', label: 'Ayarlar', num: '07', color: 'var(--c-settings)' },
 ];
 
 const IDS = VIEWS.map((v) => v.id);

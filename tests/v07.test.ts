@@ -230,7 +230,10 @@ describe('migrate — eski veri dosyası açılabiliyor mu', () => {
     const d = migrate(eski);
     expect(d.schema).toBe(SCHEMA_VERSION);
     expect(d.titles[0].name).toBe('Mr. Robot');
-    expect(d.tasks[0].done).toBe(true);
+    // Şemada olmayan bölümler (yol haritası vb.) olduğu gibi taşınır — başka
+    // bir sürümün yazdığı veri sessizce silinmemeli.
+    const korunan = d as unknown as Record<string, { done: boolean }[]>;
+    expect(korunan.tasks[0].done).toBe(true);
     // v5: notlar bloklu sayfalara dönüştü, gövde bloklara ayrıştı.
     expect(d.pages[0].blocks[0].text).toBe('gövde');
     // yeni alanlar boş ama var

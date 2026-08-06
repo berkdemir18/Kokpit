@@ -18,7 +18,6 @@ export interface ShellRefs {
 
 export interface Counts {
   watch: number;
-  cyber: number;
   goals: number;
   notes: number;
   dashboard: number;
@@ -80,7 +79,6 @@ export function renderNav(refs: ShellRefs, counts: Counts): void {
     notes: String(counts.notes),
     agenda: String(counts.agenda || ''),
     watch: String(counts.watch),
-    cyber: String(counts.cyber),
     goals: String(counts.goals),
     stats: '',
     settings: '',
@@ -143,7 +141,6 @@ export function renderTopbar(refs: ShellRefs): void {
     notes: ['Notlar', notesMeta()],
     agenda: ['Takvim & Hatırlatıcı', `${dueToday} BUGÜN · ${d.reminders.filter((r) => !r.done).length} AÇIK · ${d.events.length} TAKVİM ETKİNLİĞİ`],
     watch: ['İzleme', watchMeta()],
-    cyber: ['Siber Güvenlik', cyberMeta()],
     goals: ['Hedefler & Alışkanlıklar', `${d.habits.filter((h2) => !h2.archived).length} ALIŞKANLIK · ${d.goals.filter((g) => g.status === 'active').length} AÇIK HEDEF`],
     stats: ['İstatistik', 'BİRLEŞİK GÖRÜNÜM · ' + new Date().getFullYear()],
     settings: ['Ayarlar', 'KOKPİT 0.8 · TAURI 2 · YEREL VERİ'],
@@ -175,9 +172,3 @@ function watchMeta(): string {
   return `${d.titles.length} KAYIT · ${d.titles.filter((t) => t.status === 'active').length} İZLENİYOR · ORT. PUAN ${avg}`;
 }
 
-function cyberMeta(): string {
-  const d = db();
-  const done = d.tasks.filter((t) => t.done).length;
-  const pct = d.tasks.length ? Math.round((done / d.tasks.length) * 100) : 0;
-  return `YOL HARİTASI %${pct} · ${done}/${d.tasks.length} GÖREV · ${d.labs.filter((l) => l.solvedAt).length} LAB`;
-}

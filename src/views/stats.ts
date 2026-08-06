@@ -6,14 +6,14 @@
  */
 
 import { db } from '../core/store';
-import { AREAS, AREA_VAR, Area, Title } from '../core/model';
+import { Title } from '../core/model';
 import { h, clear, bar } from '../ui/dom';
-import { lineChart, barChart, donut, histogram, chartBox, DonutSlice } from '../ui/chart';
+import { lineChart, barChart, histogram, chartBox } from '../ui/chart';
 import {
-  MONTH_SHORT, fmtNum, habitDays, bestStreak, streak, sum, lastDays, dayKey, fmtDuration,
+  MONTH_SHORT, fmtNum, habitDays, bestStreak, streak, sum, lastDays, dayKey,
 } from '../core/util';
 
-type StatTab = 'genel' | 'siber' | 'izleme' | 'alışkanlık';
+type StatTab = 'genel' | 'izleme' | 'alışkanlık';
 
 const ui = { tab: 'genel' as StatTab, year: new Date().getFullYear() };
 
@@ -27,7 +27,6 @@ export function renderStats(root: HTMLElement): void {
   const wrap = h('div', { class: 'stack-md' }, header(), tabs());
   switch (ui.tab) {
     case 'genel': wrap.append(generalTab()); break;
-    case 'siber': wrap.append(cyberTab()); break;
     case 'izleme': wrap.append(watchTab()); break;
     case 'alışkanlık': wrap.append(habitTab()); break;
   }
@@ -39,7 +38,6 @@ export function renderStats(root: HTMLElement): void {
 function years(): number[] {
   const d = db();
   const set = new Set<number>([new Date().getFullYear()]);
-  for (const s of d.sessions) if (s.date) set.add(Number(s.date.slice(0, 4)));
   for (const t of d.titles) if (t.watchedAt) set.add(Number(t.watchedAt.slice(0, 4)));
   return [...set].filter((y) => y > 2000).sort((a, b) => b - a);
 }
@@ -65,7 +63,7 @@ function header(): HTMLElement {
 
 function tabs(): HTMLElement {
   const defs: [StatTab, string][] = [
-    ['genel', 'Genel'], ['siber', 'Siber'], ['izleme', 'İzleme'], ['alışkanlık', 'Alışkanlık'],
+    ['genel', 'Genel'], ['izleme', 'İzleme'], ['alışkanlık', 'Alışkanlık'],
   ];
   const el = h('div', { class: 'tabs' });
   for (const [id, label] of defs) {
@@ -140,151 +138,58 @@ function emptyCard(msg: string): HTMLElement {
 
 function generalTab(): HTMLElement {
   const d = db();
-  const yearMin = sum(d.sessions.filter((s) => inYear(s.date)).map((s) => s.minutes));
-  const activeDays = new Set(d.sessions.filter((s) => inYear(s.date)).map((s) => s.date)).size;
   const watched = d.titles.filter((t) => inYear(t.watchedAt)).length;
-  const solved = d.labs.filter((l) => inYear(l.solvedAt)).length;
   const notesYear = d.pages.filter((n) => inYear(n.createdAt)).length;
-  const roadDone = d.tasks.filter((t) => t.done).length;
-  const roadPct = d.tasks.length ? Math.round((roadDone / d.tasks.length) * 100) : 0;
+  const live = d.habits.filter((x) => !x.archived);
+  const bestSeri = Math.max(0, ...live.map((hb) => streak(habitDays(d.habitLogs, hb.id))));
+  const goalsDone = d.goals.filter((g) => g.status === 'done').length;
 
   const kpis = kpiRow([
-    { label: 'Yol haritası', value: `%${roadPct}`, note: `${roadDone}/${d.tasks.length} görev`, color: 'var(--c-cyber)', pct: roadPct },
-    { label: 'Siber çalışma', value: fmtNum(yearMin), unit: 'dk', note: activeDays ? `${activeDays} aktif gün · gün ort. ${Math.round(yearMin / activeDays)} dk` : 'kayıt yok', color: 'var(--c-cyber)' },
     { label: 'İzlenen içerik', value: String(watched), unit: 'adet', note: `hedef ${d.settings.yearlyWatchTarget}`, color: 'var(--c-watch)', pct: Math.min(100, Math.round((watched / Math.max(1, d.settings.yearlyWatchTarget)) * 100)) },
-    { label: 'Çözülen lab', value: String(solved), unit: 'lab', note: `${d.labs.filter((l) => l.writeup.trim()).length} writeup`, color: 'var(--c-goals)' },
-    { label: 'Yazılan not', value: String(notesYear), unit: 'sayfa', note: `toplam ${d.pages.length}`, color: 'var(--c-notes)' },
+    { label: 'Yazılan sayfa', value: String(notesYear), unit: 'sayfa', note: `toplam ${d.pages.length}`, color: 'var(--c-notes)' },
+    { label: 'En uzun seri', value: String(bestSeri), unit: 'gün', note: `${live.length} aktif alışkanlık`, color: 'var(--c-goals)' },
+    { label: 'Tamamlanan hedef', value: String(goalsDone), unit: 'hedef', note: `${d.goals.filter((g) => g.status === 'active').length} açık`, color: 'var(--c-goals)' },
   ]);
 
-  // Aylık: siber dakika (alan) + izlenen içerik (ikinci seri, ölçek farklı
-  // olduğu için izleme sayısı 10 ile çarpılıp aynı eksene bindirilmedi —
-  // iki ayrı kart daha dürüst.)
-  const studyByMonth = new Array(12).fill(0);
   const watchByMonth = new Array(12).fill(0);
-  for (const s of d.sessions) if (inYear(s.date)) studyByMonth[Number(s.date.slice(5, 7)) - 1] += s.minutes;
+  const notesByMonth = new Array(12).fill(0);
   for (const t of d.titles) if (inYear(t.watchedAt)) watchByMonth[Number(t.watchedAt.slice(5, 7)) - 1] += 1;
+  for (const n of d.pages) if (inYear(n.createdAt)) notesByMonth[Number(n.createdAt.slice(5, 7)) - 1] += 1;
 
-  const hasData = sum(studyByMonth) + sum(watchByMonth) > 0;
+  const hasData = sum(watchByMonth) + sum(notesByMonth) > 0;
 
   return h('div', { class: 'stack-md' },
     kpis,
     hasData
-      ? card('Aylık siber çalışma', `${ui.year} · dakika`,
+      ? card('Aylık izlenen içerik', `${ui.year} · adet`,
           chartBox(lineChart({
             labels: MONTH_SHORT,
-            series: [{ label: 'dakika', values: studyByMonth, color: 'var(--c-cyber)', fill: true }],
+            series: [{ label: 'içerik', values: watchByMonth, color: 'var(--c-watch)', fill: true }],
             fmtValue: (v) => fmtNum(Math.round(v)),
           })))
-      : emptyCard('Bu yıl için henüz veri yok. Siber ekranından çalışma ekle.'),
+      : emptyCard('Bu yıl için henüz veri yok. İzleme ekranından kayıt ekle.'),
     h('div', { class: 'grid-stats' },
-      card('Aylık izlenen içerik', `${ui.year}`,
-        chartBox(barChart({ labels: MONTH_SHORT, values: watchByMonth, color: 'var(--c-watch)', height: 190 }))),
-      card('Son 30 gün', 'günlük çalışma dakikası',
+      card('Aylık yazılan sayfa', `${ui.year}`,
+        chartBox(barChart({ labels: MONTH_SHORT, values: notesByMonth, color: 'var(--c-notes)', height: 190 }))),
+      card('Son 30 gün', 'günlük tamamlanan alışkanlık',
         chartBox(last30Chart())),
     ),
   );
 }
 
 function last30Chart(): SVGSVGElement {
-  const byDay = new Map<string, number>();
-  for (const s of db().sessions) byDay.set(s.date, (byDay.get(s.date) ?? 0) + s.minutes);
-  const days = lastDays(30);
-  const target = Math.round((db().settings.weeklyStudyTarget || 780) / 7);
-  return barChart({
-    labels: days.map((d, i) => (i % 5 === 0 ? d.slice(8) : '')),
-    values: days.map((d) => byDay.get(d) ?? 0),
-    color: 'var(--c-cyber)',
-    height: 190,
-    target,
-  });
-}
-
-/* ------------------------------------------------------------ siber sekme */
-
-function cyberTab(): HTMLElement {
   const d = db();
-  if (!d.sessions.length && !d.labs.length && !d.tasks.length) {
-    return emptyCard('Siber verisi yok.');
-  }
-
-  const phases = [...d.phases].sort((a, b) => a.order - b.order);
-  const roadDone = d.tasks.filter((t) => t.done).length;
-  const slices: DonutSlice[] = phases.map((p, i) => ({
-    label: p.code,
-    value: d.tasks.filter((t) => t.phaseId === p.id && t.done).length,
-    color: [
-      'var(--c-cyber)', 'var(--accent)', 'var(--warn)', 'var(--violet)',
-      'var(--teal)', 'var(--pink)', 'var(--danger)',
-    ][i % 7],
-  }));
-
-  // alan dağılımı
-  const areaMin = new Map<Area, number>();
-  for (const s of d.sessions) if (inYear(s.date)) areaMin.set(s.area, (areaMin.get(s.area) ?? 0) + s.minutes);
-  const maxArea = Math.max(1, ...areaMin.values());
-  const areaRows = AREAS
-    .filter((a) => (areaMin.get(a) ?? 0) > 0)
-    .sort((a, b) => (areaMin.get(b) ?? 0) - (areaMin.get(a) ?? 0));
-
-  const areaWrap = h('div', { class: 'col', style: { gap: '11px' } });
-  for (const a of areaRows) {
-    const v = areaMin.get(a) ?? 0;
-    areaWrap.append(distRow(a, Math.round((v / maxArea) * 100), fmtDuration(v), AREA_VAR[a]));
-  }
-  if (!areaRows.length) areaWrap.append(h('div', { class: 'empty-state', text: 'Henüz çalışma kaydı yok.' }));
-
-  // zorluk dağılımı
-  const diffs: [string, string][] = [['Kolay', 'var(--success)'], ['Orta', 'var(--warn)'], ['Zor', 'var(--danger)'], ['Insane', 'var(--pink)']];
-  const diffWrap = h('div', { class: 'col', style: { gap: '11px' } });
-  const maxDiff = Math.max(1, ...diffs.map(([nm]) => d.labs.filter((l) => l.difficulty === nm && l.solvedAt).length));
-  for (const [nm, color] of diffs) {
-    const c = d.labs.filter((l) => l.difficulty === nm && l.solvedAt).length;
-    diffWrap.append(distRow(nm, Math.round((c / maxDiff) * 100), String(c), color));
-  }
-
-  const phaseWrap = h('div', { class: 'col', style: { gap: '10px' } });
-  for (const p of phases) {
-    const ts = d.tasks.filter((t) => t.phaseId === p.id);
-    const dn = ts.filter((t) => t.done).length;
-    const pct = ts.length ? Math.round((dn / ts.length) * 100) : 0;
-    phaseWrap.append(
-      h('div', { class: 'phase-stat' },
-        h('div', { class: 'phase-stat__code', text: p.code }),
-        h('div', { class: 'phase-stat__title ellipsis', text: p.title }),
-        h('div', { style: { width: '150px', flex: 'none' } }, bar(pct, pct === 100 ? 'var(--success)' : 'var(--c-cyber)', 'bar--5')),
-        h('div', { class: 'phase-stat__pct', text: `${dn}/${ts.length}` }),
-      ),
-    );
-  }
-
-  return h('div', { class: 'stack-md' },
-    h('div', { class: 'grid-stats' },
-      card('Faz bazında tamamlanan görev', `${roadDone}/${d.tasks.length}`,
-        h('div', { class: 'donut-wrap' },
-          donut(slices, `${d.tasks.length ? Math.round((roadDone / d.tasks.length) * 100) : 0}%`, 'tamamlandı'),
-          legend(slices),
-        )),
-      card('Faz ilerlemeleri', '', phaseWrap),
-    ),
-    h('div', { class: 'grid-stats' },
-      card('Hangi alana çalışıldı', `${ui.year}`, areaWrap),
-      card('Lab zorluk dağılımı', `${d.labs.filter((l) => l.solvedAt).length} çözüm`, diffWrap),
-    ),
-  );
-}
-
-function legend(slices: DonutSlice[]): HTMLElement {
-  const wrap = h('div', { class: 'legend' });
-  for (const s of slices) {
-    wrap.append(
-      h('div', { class: 'legend__item' },
-        h('span', { class: 'legend__dot', style: { background: s.color } }),
-        h('span', { text: s.label }),
-        h('span', { class: 'legend__val push', text: String(s.value) }),
-      ),
-    );
-  }
-  return wrap;
+  const live = d.habits.filter((x) => !x.archived);
+  const byDay = new Map<string, number>();
+  for (const hb of live) for (const day of habitDays(d.habitLogs, hb.id)) byDay.set(day, (byDay.get(day) ?? 0) + 1);
+  const days = lastDays(30);
+  return barChart({
+    labels: days.map((x, i) => (i % 5 === 0 ? x.slice(8) : '')),
+    values: days.map((x) => byDay.get(x) ?? 0),
+    color: 'var(--c-goals)',
+    height: 190,
+    target: live.length || undefined,
+  });
 }
 
 /* ----------------------------------------------------------- izleme sekme */

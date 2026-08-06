@@ -26,8 +26,6 @@ const calls = [
   ['izleme_istatistik', { yil: '2026' }],
   ['notlar_ara', {}],
   ['notlar_ara', { sorgu: 'kokpit' }],
-  ['siber_ilerleme', { sadece_bekleyen: true }],
-  ['komut_defteri', {}],
   ['hedefler_aliskanliklar', {}],
   ['ajanda', { gun: 30, geriye: 7 }],
   ['son_hareketler', { gun: 7 }],

@@ -3,11 +3,9 @@
 import { store, db } from './store';
 import * as api from './api';
 import { toast } from '../ui/overlay';
-import { STATUS_LABEL, RESOURCE_STATUS_LABEL, Page } from './model';
+import { STATUS_LABEL, Page } from './model';
 import { blocksToMarkdown } from './blocks';
-import {
-  nowISO, dayKey, shortDate, fmtDuration, longDate, streak, bestStreak, habitDays, sum, lastDays,
-} from './util';
+import { nowISO, dayKey, shortDate, longDate, streak, bestStreak, habitDays } from './util';
 
 function frontmatter(title: string): string {
   return `---\ntur: kokpit-export\nbaslik: ${title}\nkaynak: Kokpit\nguncelleme: ${dayKey()}\n---\n\n`;
@@ -27,42 +25,6 @@ export function buildWatchMd(): string {
     }
     md += `\n`;
   }
-  return md;
-}
-
-export function buildCyberMd(): string {
-  const d = db();
-  let md = frontmatter('Siber İlerleme') + `# Siber Güvenlik İlerlemesi\n\n`;
-
-  const doneAll = d.tasks.filter((t) => t.done).length;
-  md += `**Yol haritası: ${doneAll}/${d.tasks.length} görev tamam** `;
-  md += d.tasks.length ? `(%${Math.round((doneAll / d.tasks.length) * 100)})\n\n` : '\n\n';
-
-  for (const p of [...d.phases].sort((a, b) => a.order - b.order)) {
-    const ts = d.tasks.filter((t) => t.phaseId === p.id).sort((a, b) => a.order - b.order);
-    const done = ts.filter((t) => t.done).length;
-    md += `## ${p.code} — ${p.title}\n\n`;
-    if (p.when) md += `_${p.when} · ${done}/${ts.length}_\n\n`;
-    for (const t of ts) {
-      md += `- [${t.done ? 'x' : ' '}] ${t.when ? `**${t.when}** · ` : ''}${t.title}`;
-      md += t.tags.length ? ` \`${t.tags.join(' ')}\`` : '';
-      md += `\n`;
-    }
-    md += `\n`;
-  }
-
-  md += `\n## Lab Günlüğü\n\n| Platform | Lab | Zorluk | Süre | Çözüm |\n|---|---|---|---|---|\n`;
-  for (const l of [...d.labs].sort((a, b) => (b.solvedAt || '9999').localeCompare(a.solvedAt || '9999'))) {
-    md += `| ${l.platform} | ${l.name} | ${l.difficulty} | ${fmtDuration(l.durationMin)} | ${l.solvedAt ? shortDate(l.solvedAt) : 'çözülmedi'} |\n`;
-  }
-
-  md += `\n## Kaynaklar\n\n`;
-  for (const r of d.resources) {
-    md += `- [${r.status === 'done' ? 'x' : ' '}] **${r.title}** (${r.kind}) — %${r.progress} · ${RESOURCE_STATUS_LABEL[r.status]}\n`;
-  }
-
-  const weekMin = sum(lastDays(7).map((dk) => sum(d.sessions.filter((s) => s.date === dk).map((s) => s.minutes))));
-  md += `\n## Özet\n\n- Çözülen lab: ${d.labs.filter((l) => l.solvedAt).length}\n- Bu hafta çalışma: ${weekMin} dk\n`;
   return md;
 }
 
@@ -135,7 +97,7 @@ export async function runExport(): Promise<void> {
 
   if (!api.isTauri()) {
     // Tarayıcı modunda dosya yazamayız; markdown'ı panoya kopyala.
-    const text = [buildWatchMd(), buildCyberMd(), buildHabitsMd()].join('\n\n---\n\n');
+    const text = [buildWatchMd(), buildHabitsMd(), buildPagesMd()].join('\n\n---\n\n');
     await navigator.clipboard.writeText(text).catch(() => {});
     toast('Tarayıcı modu: markdown panoya kopyalandı');
     return;
@@ -151,7 +113,6 @@ export async function runExport(): Promise<void> {
   try {
     const files = [
       { name: 'Izlediklerim.md', content: buildWatchMd() },
-      { name: 'Siber Ilerleme.md', content: buildCyberMd() },
       { name: 'Aliskanliklar.md', content: buildHabitsMd() },
       { name: 'Sayfalar.md', content: buildPagesMd() },
     ];
@@ -176,12 +137,6 @@ export function buildTitlesCsv(): string {
   return rows.map((r) => r.map(csvCell).join(',')).join('\n');
 }
 
-export function buildLabsCsv(): string {
-  const rows = [['platform', 'lab', 'zorluk', 'sure_dk', 'cozum', 'writeup']];
-  for (const l of db().labs) rows.push([l.platform, l.name, l.difficulty, String(l.durationMin), l.solvedAt, l.writeup]);
-  return rows.map((r) => r.map(csvCell).join(',')).join('\n');
-}
-
 /** Ayarlar'dan CSV dışa aktar. */
 export async function exportCsv(): Promise<void> {
   await store.flush();
@@ -194,7 +149,6 @@ export async function exportCsv(): Promise<void> {
   if (!dir) return;
   const written = await api.writeFiles(dir, [
     { name: 'kokpit-izleme.csv', content: buildTitlesCsv() },
-    { name: 'kokpit-lab.csv', content: buildLabsCsv() },
   ]);
   toast(`${written.length} CSV dosyası yazıldı`);
 }

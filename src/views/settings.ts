@@ -28,7 +28,7 @@ const HOTKEYS: [string, string][] = [
   ['Ctrl K', 'komut paleti · her modülde arama'],
   ['Alt Q', 'hızlı yakalama penceresi — tek elle, her yerden'],
   ['Ctrl ⇧ N', 'aynı pencere (eski kısayol)'],
-  ['1 – 8', 'modüller arası geçiş'],
+  ['1 – 7', 'modüller arası geçiş'],
   ['Tab / Ctrl 1-3', 'hızlı yakalamada sekme değiştir'],
   ['Ctrl+Enter', 'formu kaydet · notu Gelen Kutusu’na at'],
   ['Esc', 'modal / palet / onay kutusu kapat'],
@@ -418,7 +418,6 @@ function exportCard(root: HTMLElement): HTMLElement {
   const d = db();
   const files = [
     ['Izlediklerim.md', `${d.titles.length} kayıt`],
-    ['Siber Ilerleme.md', `${d.tasks.length} görev · ${d.labs.length} lab`],
     ['Aliskanliklar.md', `${d.habits.filter((x) => !x.archived).length} alışkanlık · ${d.goals.length} hedef`],
     ['Sayfalar.md', `${d.pages.filter((x) => !x.archived).length} sayfa · iç içe yapı korunur`],
   ];

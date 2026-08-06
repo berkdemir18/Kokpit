@@ -15,7 +15,7 @@ import { parseWhen, fmtDT } from '../core/util';
 import { h, clear } from './dom';
 import { mountWhenPicker } from './when-picker';
 
-export type CaptureKind = 'not' | 'hatırlatıcı' | 'görev';
+export type CaptureKind = 'not' | 'hatırlatıcı';
 
 export interface CaptureResult {
   kind: CaptureKind;
@@ -29,7 +29,6 @@ export interface CaptureResult {
 const TABS: [CaptureKind, string, string, string][] = [
   ['not', 'Not', '1', 'Aklındakini yaz… → Gelen Kutusu'],
   ['hatırlatıcı', 'Hatırlatıcı', '2', 'ör: 21.30 anneme telefon · yarın 14:00 diş hekimi'],
-  ['görev', 'Görev', '3', 'Yol haritasına görev ekle…'],
 ];
 
 /**
@@ -41,13 +40,11 @@ const TABS: [CaptureKind, string, string, string][] = [
 const SUGGESTIONS: Record<CaptureKind, string[]> = {
   not: ['Fikir: ', 'Araştır: ', 'Satın al: '],
   'hatırlatıcı': [],
-  'görev': ['TryHackMe ', 'Lab: ', 'Oku: '],
 };
 
 const HINT: Record<CaptureKind, string> = {
   not: 'Gelen Kutusu\'na düşer',
   'hatırlatıcı': 'saati metnin içine yazabilirsin',
-  'görev': 'yol haritasındaki güncel faza eklenir',
 };
 
 export interface CaptureFormOptions {

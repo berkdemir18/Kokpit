@@ -13,7 +13,7 @@ import './styles/v08.css';
 import './styles/onboarding.css';
 
 import { store, db } from './core/store';
-import { seedDB, buildRoadmap } from './core/seed';
+import { seedDB } from './core/seed';
 import { currentView, onRouteChange, navigate, applyViewColor, VIEWS } from './core/router';
 import * as api from './core/api';
 import { buildShell, renderNav, renderFoot, renderTopbar, ShellRefs, Counts } from './ui/shell';
@@ -23,7 +23,6 @@ import { chime, primeAudio } from './core/alarm';
 import { openPalette } from './ui/palette';
 import { openOnboarding } from './ui/onboarding';
 import { addNoteToInbox } from './views/notes';
-import { addRoadmapTask, revealCapturedTasks } from './views/cyber';
 import { addReminder, startScheduler, completeReminder, updateReminder, syncNative } from './core/reminders';
 import { dtKey } from './core/util';
 import { Repeat } from './core/model';
@@ -32,7 +31,6 @@ import { uid, nowISO, dayKey, fmtDT } from './core/util';
 
 import { renderDashboard } from './views/dashboard';
 import { renderWatch } from './views/watch';
-import { renderCyber } from './views/cyber';
 import { renderGoals } from './views/goals';
 import { renderNotes } from './views/notes';
 import { renderAgenda } from './views/agenda';
@@ -48,7 +46,6 @@ function counts(): Counts {
   return {
     dashboard: d.reminders.filter((r) => !r.done && r.at.slice(0, 10) <= today).length,
     watch: d.titles.length,
-    cyber: d.tasks.filter((t) => !t.done).length,
     goals: d.goals.filter((g) => g.status === 'active').length,
     notes: d.pages.filter((p) => !p.archived).length,
     agenda: d.reminders.filter((r) => !r.done).length,
@@ -64,7 +61,6 @@ function renderContent(): void {
   switch (view) {
     case 'dashboard': renderDashboard(el); break;
     case 'watch': renderWatch(el); break;
-    case 'cyber': renderCyber(el); break;
     case 'goals': renderGoals(el); break;
     case 'notes': renderNotes(el); break;
     case 'agenda': renderAgenda(el); break;
@@ -115,16 +111,6 @@ function applyCapture(res: CaptureResult): void {
   if (res.kind === 'hatırlatıcı') {
     addReminder(res.text, res.at, res.repeat);
     toast(`Hatırlatıcı kuruldu · ${fmtDT(res.at)}`, goto('agenda'), 'GÖSTER');
-  } else if (res.kind === 'görev') {
-    const ok = addRoadmapTask(res.text);
-    if (ok) {
-      toast('Görev eklendi · Siber → Yol Haritası → Yakalananlar', () => {
-        revealCapturedTasks();
-        goto('cyber')();
-      }, 'GÖSTER');
-    } else {
-      toast('Önce Siber ekranında bir faz gerekli');
-    }
   } else {
     addNoteToInbox(res.text);
     toast('Gelen Kutusu\'na eklendi', goto('notes'), 'GÖSTER');
@@ -175,15 +161,6 @@ async function main(): Promise<void> {
   if (store.ready && !store.hadFile) {
     store.update((d) => {
       Object.assign(d, seedDB());
-    });
-    await store.flush();
-  } else if (store.ready && db().phases.length === 0) {
-    // Yol haritasından önce oluşmuş bir veri dosyası: mevcut verilere
-    // dokunmadan sadece SOC yol haritasını ekle.
-    store.update((d) => {
-      const rm = buildRoadmap();
-      d.phases = rm.phases;
-      d.tasks = rm.tasks;
     });
     await store.flush();
   }
@@ -276,7 +253,7 @@ function onKey(e: KeyboardEvent): void {
   if (typing || anyOverlayOpen()) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-  if (k >= '1' && k <= '8') {
+  if (k >= '1' && k <= '7') {
     const v = VIEWS[Number(k) - 1];
     if (v) navigate(v.id);
     return;

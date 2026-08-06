@@ -2,7 +2,7 @@
 
 import { db } from './store';
 import { ViewId } from './router';
-import { shortDate, fmtDT } from './util';
+import { fmtDT } from './util';
 
 export interface SearchHit {
   kind: string;
@@ -17,24 +17,6 @@ export function buildIndex(): SearchHit[] {
 
   for (const t of d.titles) {
     out.push({ kind: t.kind === 'film' ? 'FİLM' : 'DİZİ', label: t.name, meta: `${t.year || '—'} · ${t.genres.join(', ')}`, view: 'watch' });
-  }
-  for (const l of d.labs) {
-    out.push({ kind: 'LAB', label: l.name, meta: `${l.platform} · ${l.difficulty} · ${l.solvedAt ? shortDate(l.solvedAt) : 'çözülmedi'}`, view: 'cyber' });
-  }
-  for (const t of d.tasks) {
-    const phase = d.phases.find((p) => p.id === t.phaseId);
-    out.push({
-      kind: 'GÖREV',
-      label: t.title,
-      meta: `${phase?.code ?? ''}${t.when ? ' · ' + t.when : ''}${t.done ? ' · ✓' : ''}`,
-      view: 'cyber',
-    });
-  }
-  for (const r of d.resources) {
-    out.push({ kind: 'KAYNAK', label: r.title, meta: `${r.kind} · %${r.progress}`, view: 'cyber' });
-  }
-  for (const s of d.snippets) {
-    out.push({ kind: 'KOMUT', label: s.title, meta: s.language, view: 'cyber' });
   }
   for (const g of d.goals) {
     out.push({ kind: 'HEDEF', label: g.title, meta: g.area, view: 'goals' });

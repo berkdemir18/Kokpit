@@ -3,7 +3,7 @@
  * Kokpit MCP sunucusu — SALT OKUNUR.
  *
  * Kokpit'in veri dosyasini (data.json) okuyup Berk'in film/dizi takibini,
- * notlarini, siber guvenlik yol haritasini, hedeflerini ve ajandasini
+ * notlarini, hedeflerini ve ajandasini
  * yapay zeka asistanlarina arac olarak acar. Hicbir arac veriyi degistirmez.
  *
  * Calistirma:  node server.js           (stdio)
@@ -27,8 +27,7 @@ const server = new McpServer(
     instructions:
       'Kokpit, Berk\'in masaustu takip uygulamasidir. Bu sunucu onun verisini ' +
       'salt-okunur sunar: izledigi/izleyecegi film ve diziler (bolum bazinda), ' +
-      'Notion tarzi notlari/sayfalari, siber guvenlik yol haritasi ve calisma ' +
-      'kayitlari, hedef/aliskanliklari, hatirlaticilari ve takvimi. ' +
+      'Notion tarzi notlari/sayfalari, hedef/aliskanliklari, hatirlaticilari ve takvimi. ' +
       'Berk hakkinda "ne izliyor", "nerede kalmis", "ne yazmis", "hangi gorev ' +
       'sirada" gibi sorularda once kokpit_ozet cagir, sonra ilgili detay aracina in. ' +
       'Veriyi degistiren arac yoktur; degisiklik gerekiyorsa Berk uygulamadan yapar.',
@@ -59,7 +58,7 @@ tool(
     title: 'Kokpit özeti',
     description:
       'Kokpit\'in genel durumu: izlenen/izlenecek sayıları, şu an izlenen diziler ve ' +
-      'kalınan bölüm, siber yol haritası ilerlemesi, açık hedefler, yaklaşan ' +
+      'kalınan bölüm, açık hedefler, yaklaşan ' +
       'hatırlatıcılar ve son güncellenen notlar. Kokpit ile ilgili her soruda ilk buraya bak.',
     inputSchema: {},
   },
@@ -80,14 +79,6 @@ tool(
           : p.total ? 'tüm bölümler izlendi' : `S${x.season}B${x.episode}`;
         return `- ${x.name}${x.year ? ` (${x.year})` : ''} · ${p.total ? `${p.watched}/${p.total} (%${p.pct})` : '—'} · ${kald}`;
       });
-
-    const doneTask = db.tasks.filter((x) => x.done).length;
-    const faz = [...db.phases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const fazSat = faz.map((f) => {
-      const gs = db.tasks.filter((x) => x.phaseId === f.id);
-      const d = gs.filter((x) => x.done).length;
-      return `- ${f.code} ${f.title} — ${d}/${gs.length}${f.when ? ` · ${f.when}` : ''}`;
-    });
 
     const bugun = todayISO();
     const yaklasan = db.reminders
@@ -114,7 +105,6 @@ tool(
         `Toplam ${t.length} kayıt · ${t.filter((x) => x.kind === 'film').length} film, ${t.filter((x) => x.kind === 'dizi').length} dizi\n` +
         `İzlendi ${done.length} (bu yıl ${buYil.length}) · İzleniyor ${izleniyor.length} · İzlenecek ${planned.length} · Bıraktım ${t.filter((x) => x.status === 'dropped').length}` +
         (izlemeSat.length ? `\n\n**Şu an izlenenler:**\n${capped(izlemeSat, 12)}` : '')),
-      section('Siber yol haritası', `${doneTask}/${db.tasks.length} görev tamam\n${fazSat.join('\n')}`),
       section('Hedefler', hedef.join('\n')),
       section('Alışkanlıklar', db.habits.filter((h) => !h.archived)
         .map((h) => `- ${h.name} (${h.cadence}, hafta hedefi ${h.targetPerWeek}, toplam ${(db.habitLogs[h.id] ?? []).length} gün)`).join('\n')),
@@ -399,93 +389,6 @@ tool(
   }
 );
 
-/* ------------------------------------------------------------------- siber */
-
-tool(
-  'siber_ilerleme',
-  {
-    title: 'Siber yol haritası ve ilerleme',
-    description:
-      'Siber güvenlik (SOC) yol haritası: fazlar, görevler ve tamamlanma durumu; ' +
-      'ayrıca kaynaklar (kurs/kitap/lab), çözülen lab kayıtları ve çalışma süresi ' +
-      'özeti. "Nerede kalmış", "sırada ne var" sorularının cevabı burada.',
-    inputSchema: {
-      faz: z.string().optional().describe('Sadece bu faz, örn "FAZ 1"'),
-      sadece_bekleyen: z.boolean().default(false).describe('Tamamlanan görevleri gizle'),
-      detay: z.boolean().default(false).describe('Görev notlarını da göster'),
-    },
-  },
-  async (a, db) => {
-    const phases = [...db.phases].sort((x, y) => (x.order ?? 0) - (y.order ?? 0))
-      .filter((f) => !a.faz || fold(f.code).includes(fold(a.faz)) || matches(a.faz, f.title));
-
-    const blocks = phases.map((f) => {
-      const gs = db.tasks.filter((t) => t.phaseId === f.id)
-        .sort((x, y) => (x.order ?? 0) - (y.order ?? 0))
-        .filter((t) => !a.sadece_bekleyen || !t.done);
-      const all = db.tasks.filter((t) => t.phaseId === f.id);
-      const d = all.filter((t) => t.done).length;
-      const head = `### ${f.code} — ${f.title}\n${f.when ? `${f.when} · ` : ''}${d}/${all.length} tamam${f.goal ? `\nHedef: ${f.goal}` : ''}`;
-      const lines = gs.map((t) => {
-        const tag = t.tags?.length ? ` [${t.tags.join(', ')}]` : '';
-        const note = a.detay && t.note ? `\n    ${t.note}` : '';
-        return `- [${t.done ? 'x' : ' '}] ${t.when ? `(${t.when}) ` : ''}${t.title}${tag}${t.done && t.doneAt ? ` · ${t.doneAt}` : ''}${note}`;
-      });
-      return `${head}\n${lines.join('\n')}`;
-    });
-
-    const kaynak = db.resources.map((r) =>
-      `- [${r.kind}] ${r.title} — ${resStatusLabel(r.status)}, %${r.progress ?? 0}${r.rating ? ` · ${r.rating}/10` : ''}${r.link ? `\n    ${r.link}` : ''}`);
-
-    const lab = [...db.labs].sort((x, y) => (y.solvedAt || '').localeCompare(x.solvedAt || ''))
-      .map((l) => `- ${l.platform} · ${l.name} (${l.difficulty})${l.solvedAt ? ` · ${l.solvedAt}` : ''}${l.durationMin ? ` · ${l.durationMin} dk` : ''}${l.tags?.length ? ` · ${l.tags.join(', ')}` : ''}`);
-
-    const dk = db.sessions.reduce((s, x) => s + (x.minutes ?? 0), 0);
-    const son7 = todayISO(new Date(Date.now() - 7 * 864e5));
-    const dk7 = db.sessions.filter((s) => (s.date || '') >= son7).reduce((s, x) => s + (x.minutes ?? 0), 0);
-    const alan = new Map();
-    for (const s of db.sessions) alan.set(s.area, (alan.get(s.area) ?? 0) + (s.minutes ?? 0));
-
-    return text(joinSections(
-      `# Siber ilerleme — ${db.tasks.filter((t) => t.done).length}/${db.tasks.length} görev`,
-      blocks.join('\n\n'),
-      section('Kaynaklar', capped(kaynak, 30)),
-      section('Lab kayıtları', lab.length ? capped(lab, 40) : 'henüz kayıt yok'),
-      section('Çalışma',
-        `Toplam ${Math.round(dk / 60)} saat (${db.sessions.length} oturum) · son 7 gün ${dk7} dk · haftalık hedef ${db.settings.weeklyStudyTarget ?? '—'} dk` +
-        (alan.size ? `\n${[...alan.entries()].sort((x, y) => y[1] - x[1]).map(([k, v]) => `- ${k}: ${v} dk`).join('\n')}` : ''))
-    ));
-  }
-);
-
-tool(
-  'komut_defteri',
-  {
-    title: 'Komut defteri',
-    description:
-      'Kokpit\'in komut/kod defterindeki kayıtlar: başlık, dil, kod ve açıklama. ' +
-      'Berk\'in daha önce kaydettiği bir komutu ararken kullan.',
-    inputSchema: {
-      sorgu: z.string().optional().describe('Başlık, kod, açıklama veya etikette aranacak metin'),
-      dil: z.string().optional().describe('Örn "bash", "python"'),
-      limit: z.number().min(1).max(50).default(20),
-    },
-  },
-  async (a, db) => {
-    const list = db.snippets.filter((s) => {
-      if (a.dil && fold(s.language) !== fold(a.dil)) return false;
-      return matches(a.sorgu, s.title, s.code, s.explanation, (s.tags ?? []).join(' '));
-    }).sort((x, y) => (y.updatedAt || '').localeCompare(x.updatedAt || ''));
-
-    const lines = list.slice(0, a.limit ?? 20).map((s) =>
-      `### ${s.title}${s.tags?.length ? ` · ${s.tags.join(', ')}` : ''}\n` +
-      `\`\`\`${s.language || ''}\n${s.code}\n\`\`\`` +
-      (s.explanation ? `\n${s.explanation}` : ''));
-
-    return text(`${list.length} kayıt\n\n${lines.join('\n\n')}`);
-  }
-);
-
 /* ------------------------------------------------- hedefler & aliskanliklar */
 
 tool(
@@ -606,9 +509,6 @@ tool(
       }
     }
     for (const p of db.pages) push(p.updatedAt, `📝 not: ${p.title || '(başlıksız)'}`);
-    for (const t of db.tasks) if (t.done) push(t.doneAt, `✅ görev: ${t.title}`);
-    for (const l of db.labs) push(l.solvedAt, `🧪 lab: ${l.platform} · ${l.name}`);
-    for (const s of db.sessions) push(s.date, `⏱ çalışma: ${s.minutes} dk · ${s.area}${s.note ? ` — ${s.note}` : ''}`);
     for (const h of db.habits) {
       for (const d of db.habitLogs[h.id] ?? []) push(d, `🔁 alışkanlık: ${h.name}`);
     }

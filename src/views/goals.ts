@@ -193,11 +193,13 @@ function toggleMilestone(goalId: string, idx: number): void {
 }
 
 function weekSummaryCard(): HTMLElement {
-  // Bu haftanın her günü için toplam çalışma dakikası (sessions'tan).
+  // Bu haftanın her günü: kaç alışkanlık tamamlandı (hedef = aktif alışkanlık sayısı).
+  const d = db();
+  const live = d.habits.filter((x) => !x.archived);
   const start = weekStart();
   const byDay = new Map<string, number>();
-  for (const s of db().sessions) byDay.set(s.date, (byDay.get(s.date) ?? 0) + s.minutes);
-  const target = Math.round((db().settings.weeklyStudyTarget || 780) / 7);
+  for (const hb of live) for (const day of habitDays(d.habitLogs, hb.id)) byDay.set(day, (byDay.get(day) ?? 0) + 1);
+  const target = live.length;
   const maxH = 76;
   const maxVal = Math.max(target, ...DAYS.map((_, i) => byDay.get(dayKey(new Date(start.getTime() + i * 86400000))) ?? 0), 1);
 
@@ -211,7 +213,7 @@ function weekSummaryCard(): HTMLElement {
       h('div', { class: 'chart__col' },
         h('div', { style: { width: '100%', height: `${maxH}px`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', position: 'relative' } },
           h('div', { style: { position: 'absolute', left: '10%', right: '10%', bottom: `${targetH}px`, height: '1px', background: 'var(--border-strong)' } }),
-          h('div', { style: { width: '60%', height: `${barH}px`, background: val >= target ? 'var(--success)' : 'var(--accent)', borderRadius: '2px 2px 0 0' }, title: `${val} dk` }),
+          h('div', { style: { width: '60%', height: `${barH}px`, background: val >= target && target > 0 ? 'var(--success)' : 'var(--accent)', borderRadius: '2px 2px 0 0' }, title: `${val} alışkanlık` }),
         ),
         h('div', { class: 'chart__label', text: label }),
       ),
@@ -230,7 +232,7 @@ async function openGoal(root: HTMLElement, g?: Goal): Promise<void> {
     wide: true,
     fields: [
       { kind: 'text', key: 'title', label: 'Başlık', value: g?.title ?? '', span: 2 },
-      { kind: 'text', key: 'area', label: 'Alan', value: g?.area ?? 'siber' },
+      { kind: 'text', key: 'area', label: 'Alan', value: g?.area ?? 'genel' },
       { kind: 'date', key: 'targetDate', label: 'Hedef tarih', value: g?.targetDate ?? '' },
       { kind: 'textarea', key: 'milestones', label: 'Kilometre taşları (her satır bir madde; başına ✓ koyarsan tamamlanmış sayılır)', value: (g?.milestones ?? []).map((m) => (m.done ? '✓ ' : '') + m.text).join('\n'), span: 2, rows: 5 },
     ],

@@ -65,93 +65,6 @@ export interface Title {
   episodesFetchedAt: string;
 }
 
-/* ------------------------------------------------------------------- Siber */
-
-export type Area = 'ağ' | 'linux' | 'web' | 'exploit' | 'adli' | 'blue' | 'kripto';
-
-export const AREAS: Area[] = ['ağ', 'linux', 'web', 'exploit', 'adli', 'blue', 'kripto'];
-
-export const AREA_VAR: Record<Area, string> = {
-  'ağ': 'var(--area-ag)',
-  linux: 'var(--area-linux)',
-  web: 'var(--area-web)',
-  exploit: 'var(--area-exploit)',
-  adli: 'var(--area-adli)',
-  blue: 'var(--area-blue)',
-  kripto: 'var(--area-kripto)',
-};
-
-/** Yol haritası fazı — "FAZ 0", "FAZ 1"… */
-export interface Phase {
-  id: ID;
-  code: string;   // FAZ 0
-  title: string;
-  when: string;   // AĞU–EYL 2026 · ~6 HAFTA
-  goal: string;
-  order: number;
-}
-
-/** Faz içindeki tek bir görev; işaretlenebilir. */
-export interface RoadmapTask {
-  id: ID;
-  phaseId: ID;
-  when: string;   // Hafta 1-2 / EKİM / SÜREKLİ
-  title: string;
-  note: string;
-  tags: string[]; // ÜCRETSİZ, KRİTİK, EN ÖNCELİKLİ…
-  done: boolean;
-  doneAt: ISODate | '';
-  order: number;
-}
-
-export type ResourceKind = 'kurs' | 'kitap' | 'video' | 'makale' | 'lab';
-
-export interface Resource {
-  id: ID;
-  kind: ResourceKind;
-  title: string;
-  link: string;
-  progress: number; // 0-100
-  status: Status;
-  phaseId: ID | null;
-  rating: number | null;
-  updatedAt: string;
-}
-
-export type Platform = 'TryHackMe' | 'HackTheBox' | 'CTF' | 'diğer';
-export type Difficulty = 'Kolay' | 'Orta' | 'Zor' | 'Insane';
-
-export interface LabEntry {
-  id: ID;
-  platform: Platform;
-  name: string;
-  difficulty: Difficulty;
-  solvedAt: ISODate | '';
-  durationMin: number;
-  writeup: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Snippet {
-  id: ID;
-  title: string;
-  language: string;
-  code: string;
-  explanation: string;
-  tags: string[];
-  updatedAt: string;
-}
-
-export interface StudySession {
-  id: ID;
-  date: ISODate;
-  minutes: number;
-  area: Area;
-  note: string;
-}
-
 /* -------------------------------------------------- Hedefler & alışkanlıklar */
 
 export type Cadence = 'günlük' | 'haftalık';
@@ -350,12 +263,6 @@ export interface Settings {
 export interface DB {
   schema: number;
   titles: Title[];
-  phases: Phase[];
-  tasks: RoadmapTask[];
-  resources: Resource[];
-  labs: LabEntry[];
-  snippets: Snippet[];
-  sessions: StudySession[];
   habits: Habit[];
   habitLogs: HabitLogs;
   goals: Goal[];
@@ -386,12 +293,6 @@ export function emptyDB(): DB {
   return {
     schema: SCHEMA_VERSION,
     titles: [],
-    phases: [],
-    tasks: [],
-    resources: [],
-    labs: [],
-    snippets: [],
-    sessions: [],
     habits: [],
     habitLogs: {},
     goals: [],
@@ -482,15 +383,9 @@ export function migrate(raw: unknown): DB {
     episodes: t.episodes ?? [],
     episodesFetchedAt: t.episodesFetchedAt ?? '',
   }));
-  return {
+  const out: DB = {
     schema: SCHEMA_VERSION,
     titles,
-    phases: arr<Phase>(d.phases),
-    tasks: arr<RoadmapTask>(d.tasks),
-    resources: arr<Resource>(d.resources),
-    labs: arr<LabEntry>(d.labs),
-    snippets: arr<Snippet>(d.snippets),
-    sessions: arr<StudySession>(d.sessions),
     habits: arr<Habit>(d.habits),
     habitLogs:
       d.habitLogs && typeof d.habitLogs === 'object' ? (d.habitLogs as HabitLogs) : {},
@@ -510,4 +405,14 @@ export function migrate(raw: unknown): DB {
     events: arr<CalEvent>(d.events),
     settings: { ...base.settings, ...(d.settings ?? {}) },
   };
+
+  // Şemada olmayan üst düzey bölümler olduğu gibi taşınır. Başka bir sürümle
+  // yazılmış bir dosya açıldığında tanımadığımız veri sessizce silinmesin —
+  // okumadığımız şeyi yok etme hakkımız yok.
+  const known = new Set(Object.keys(out));
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!known.has(k)) (out as unknown as Record<string, unknown>)[k] = v;
+  }
+
+  return out;
 }

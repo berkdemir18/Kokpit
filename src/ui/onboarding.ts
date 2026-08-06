@@ -37,10 +37,10 @@ const STEPS: Step[] = [
     badge: 'BAŞLANGIÇ',
     title: 'Kokpit’e hoş geldin',
     lead:
-      'Kokpit; notlarını, izlediklerini, öğrenme planını ve hatırlatıcılarını tek pencerede toplayan ' +
+      'Kokpit; notlarını, izlediklerini, hedeflerini ve hatırlatıcılarını tek pencerede toplayan ' +
       'kişisel bir takip uygulaması. İnternete bağlanmadan çalışır, verin bilgisayarından çıkmaz.',
     items: [
-      { view: 'dashboard', iconName: 'dashboard', title: 'Sol taraf modüller', desc: 'Sekiz modül var; sırayla 1–8 tuşlarıyla da geçebilirsin.' },
+      { view: 'dashboard', iconName: 'dashboard', title: 'Sol taraf modüller', desc: 'Yedi modül var; sırayla 1–7 tuşlarıyla da geçebilirsin.' },
       { view: 'dashboard', iconName: 'brand', title: 'Bu ekranı istediğin zaman aç', desc: 'Ayarlar → “Öğreticiyi göster” ile bu tur tekrar başlar.' },
     ],
     foot: 'Şu an gördüğün kayıtlar örnek veridir — Ayarlar’dan tek tuşla temizlenir.',
@@ -52,7 +52,7 @@ const STEPS: Step[] = [
       'Çoğu gün üç ekran yeter. Aklına bir şey geldiğinde uygulamayı açmanı bile beklemez: ' +
       'Alt+Q ile küçük bir kutu açılır, yazarsın, kapanır.',
     items: [
-      { view: 'dashboard', iconName: 'dashboard', title: 'Bugün', desc: 'Açılış ekranı. Hızlı not kutusu, bugünün hatırlatıcıları ve sıradaki görevler burada.' },
+      { view: 'dashboard', iconName: 'dashboard', title: 'Bugün', desc: 'Açılış ekranı. Hızlı not kutusu, bugünün ajandası ve alışkanlık listesi burada.' },
       { view: 'notes', iconName: 'notes', title: 'Notlar', desc: 'Blok tabanlı editör: “/” yaz, blok menüsü açılsın. Başlık, yapılacak listesi, kod, tablo, iç içe sayfa.' },
       { view: 'agenda', iconName: 'agenda', title: 'Takvim & Hatırlatıcı', desc: '“yarın 14:00 diş hekimi” diye yaz, tarihi kendi ayıklar. Zamanı gelince Windows bildirimi gelir.' },
     ],
@@ -63,7 +63,6 @@ const STEPS: Step[] = [
     lead: 'Bunlar zaman içinde dolar. Bugün boş görünmeleri normal — kullandıkça anlam kazanırlar.',
     items: [
       { view: 'watch', iconName: 'watch', title: 'İzleme', desc: 'Film ve dizi takibi. Dizide kaçıncı bölümde kaldığını tutar; puan, etiket ve geçmiş akışı var.' },
-      { view: 'cyber', iconName: 'cyber', title: 'Siber', desc: 'Fazlara bölünmüş öğrenme yol haritası. Örnek fazlar hazır gelir, kendi planınla değiştir.' },
       { view: 'goals', iconName: 'goals', title: 'Hedefler', desc: 'Hedefler, kilometre taşları ve alışkanlık serileri. Seriyi kırmamak asıl mesele.' },
       { view: 'stats', iconName: 'stats', title: 'İstatistik', desc: 'Yukarıdaki her şeyin grafiklerle özeti.' },
     ],
@@ -75,7 +74,7 @@ const STEPS: Step[] = [
     keys: [
       ['Alt + Q', 'Hızlı yakalama — uygulama kapalıyken bile açılır'],
       ['Ctrl + K', 'Komut paleti — her şeye buradan ulaşılır'],
-      ['1 – 8', 'Modüller arası geçiş'],
+      ['1 – 7', 'Modüller arası geçiş'],
       ['Esc', 'Açık pencereyi kapat'],
     ],
     foot:

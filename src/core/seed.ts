@@ -6,28 +6,6 @@
 import { DB, emptyDB, emptyPage } from './model';
 import { markdownToBlocks } from './blocks';
 import { addDays, dayKey, uid } from './util';
-import { ROADMAP } from './roadmap-data';
-
-/**
- * Yol haritası fazlarını ve görevlerini üretir.
- * Hem ilk kurulumda hem de eski (yol haritası olmayan) bir veri dosyası
- * açıldığında kullanılır — mevcut veriye dokunmadan sadece haritayı ekler.
- */
-export function buildRoadmap(): { phases: DB['phases']; tasks: DB['tasks'] } {
-  const phases: DB['phases'] = [];
-  const tasks: DB['tasks'] = [];
-  ROADMAP.forEach((p, pi) => {
-    const phaseId = uid('p');
-    phases.push({ id: phaseId, code: p.code, title: p.title, when: p.when, goal: p.goal, order: pi });
-    p.tasks.forEach((t, ti) => {
-      tasks.push({
-        id: uid('rt'), phaseId, when: t.when, title: t.title, note: t.note,
-        tags: t.tags, done: false, doneAt: '', order: ti,
-      });
-    });
-  });
-  return { phases, tasks };
-}
 
 export function seedDB(): DB {
   const db = emptyDB();
@@ -58,45 +36,6 @@ export function seedDB(): DB {
     tmdbId: null, episodes: [], episodesFetchedAt: '',
   }));
 
-  /* --- Siber yol haritası: örnek fazlar (roadmap-data.ts) --- */
-  const rm = buildRoadmap();
-  db.phases = rm.phases;
-  db.tasks = rm.tasks;
-
-  const phaseByCode = (code: string) => db.phases.find((p) => p.code === code)?.id ?? null;
-
-  /* --- Kaynaklar: örnek kayıtlar, kendi kaynaklarınla değiştir --- */
-  const resDefs: [DB['resources'][0]['kind'], string, string, number, DB['resources'][0]['status'], string][] = [
-    ['lab', 'Komut satırı alıştırmaları', 'örnek kayıt', 0, 'planned', 'FAZ 0'],
-    ['kurs', 'Giriş seviyesi güvenlik kursu', 'örnek kayıt', 0, 'planned', 'FAZ 0'],
-    ['kurs', 'Betik dili temelleri', 'örnek kayıt', 0, 'planned', 'FAZ 0'],
-    ['lab', 'Başlangıç öğrenme yolu', 'örnek kayıt · ~20 saat', 0, 'planned', 'FAZ 1'],
-    ['kurs', 'Ağ temelleri kursu', 'örnek kayıt · ~30 saat', 0, 'planned', 'FAZ 1'],
-    ['lab', 'Uygulamalı analiz yolu', 'örnek kayıt', 0, 'planned', 'FAZ 2'],
-    ['kitap', 'Bir gramer kitabı', 'haftada 2 ünite', 0, 'planned', 'FAZ 2'],
-  ];
-  db.resources = resDefs.map(([kind, title, link, progress, status, code]) => ({
-    id: uid('r'), kind, title, link, progress, status,
-    phaseId: phaseByCode(code), rating: null, updatedAt: now,
-  }));
-
-  /* --- Lab günlüğü: boş başlar, ilk odayı çözünce sen eklersin --- */
-  db.labs = [];
-
-  /* --- Komut defteri: örnek kayıtlar, biçimi göstermek için --- */
-  const snipDefs: [string, string, string, string][] = [
-    ['Ağ keşfi — temel 4 komut', 'bash', 'ping -c 4 example.com\nnslookup example.com\ntraceroute example.com\nnetstat -tulpn', 'Ağ temellerinin pratiği. Çıktıyı okumaya çalış.'],
-    ['Dosya arama — find & grep', 'bash', 'find / -name "*.log" 2>/dev/null\ngrep -rn "ERROR" /var/log/\nfind . -type f -mtime -1', 'Fare kullanmadan dosya bulup içinde kelime aratmak.'],
-    ['Log filtreleyen betik', 'python', 'with open("app.log") as f:\n    hatalar = [s for s in f if "ERROR" in s]\n\nwith open("hatalar.log", "w") as f:\n    f.writelines(hatalar)\n\nprint(f"{len(hatalar)} hata satiri yazildi")', 'Küçük bir otomasyon örneği.'],
-    ['İzinler — chmod & chown', 'bash', 'ls -la\nchmod 644 dosya.txt\nchmod +x script.sh\nchown kullanici:kullanici dosya.txt', 'rwx mantığını oturt: 4=oku, 2=yaz, 1=çalıştır.'],
-  ];
-  db.snippets = snipDefs.map(([title, language, code, explanation]) => ({
-    id: uid('s'), title, language, code, explanation, tags: [], updatedAt: now,
-  }));
-
-  /* --- Çalışma oturumları: boş başlar, çalıştıkça heatmap dolar --- */
-  db.sessions = [];
-
   /* --- Alışkanlıklar: örnek kayıtlar --- */
   const habitDefs: [string, DB['habits'][0]['cadence'], number][] = [
     ['Çalışma · 1.5 saat', 'günlük', 5],
@@ -111,11 +50,11 @@ export function seedDB(): DB {
 
   /* --- Hedefler: örnek kilometre taşları --- */
   const goalDefs: [string, string, string, [string, boolean][]][] = [
-    ['Faz 0 — temeli kaz', 'siber', dayKey(addDays(today, 45)), [
-      ['Sanal makine kuruldu', false],
-      ['Temel komutlar kas hafızasında', false],
-      ['İlk alıştırma seti bitti', false],
-      ['Bitirme betiği yazıldı', false],
+    ['Yeni bir konuya başla', 'öğrenme', dayKey(addDays(today, 45)), [
+      ['Kaynak seçildi', false],
+      ['İlk hafta tamamlandı', false],
+      ['Ara tekrar yapıldı', false],
+      ['Bitirme çalışması yazıldı', false],
     ]],
     ['Yabancı dil seviyesini bir kademe yükselt', 'ingilizce', dayKey(addDays(today, 180)), [
       ['Mevcut seviye ölçüldü', false],
@@ -132,9 +71,9 @@ export function seedDB(): DB {
 
   /* --- Notlar --- */
   const noteDefs: [string, string, string[], boolean, string, string][] = [
-    ['Yasal sınır — izin yoksa dokunma', '# Kural\n\n**İzin verilmeyen hiçbir sisteme dokunma.** Sadece:\n\n- kendi lab makinelerin\n- TryHackMe / HackTheBox / OverTheWire gibi izinli platformlar\n- yazılı izin aldığın sistemler\n\nKaza eseri açık bulursan: kullanma, kanıt toplama, sahibine bildir.\nTürkiye\'de TCK 243-244 kapsamında yetkisiz erişim suç.', ['kural', 'siber'], true, '⚖️', 'gül'],
-    ['Haftalık rutin şablonu', '# Haftalık rutin\n\nGünde 1.5–2 saat, haftada 5 gün.\n\n- **Pzt–Sal:** komut satırı pratiği\n- **Çar:** kurs\n- **Per:** ağ pratiği\n- **Cum:** betik yazma\n- **Her gün:** 20 dk yabancı dil + 3 cümlelik not\n\nYoğun dönemde: günde 30 dk\'ya düşür ama **sıfırlama**. Seri kırılmasın.', ['sistem', 'rutin'], true, '🗓️', 'mavi'],
-    ['Lab planı', '# Ev lab kurulumu\n\nSanallaştırma üzerinde 3 makine:\n\n1. Test istemcisi\n2. Hedef sistem\n3. Kayıt/izleme sunucusu\n\nEgzersiz: senaryoyu çalıştır → kayıtlarda izini bul. Bu tek alıştırma onlarca kurstan değerli.', ['lab', 'plan'], false, '🧪', 'yeşil'],
+    ['Blok editörü nasıl çalışır', '# Bloklar\n\nHer satır bir **blok**. Satır başında `/` yazınca blok menüsü açılır.\n\n- [ ] Yapılacak maddesi — kutuya tıkla, işaretlensin\n- [x] İşaretlenmiş madde\n\n> [!bilgi]\n> Böyle bir bilgi kutusu için satıra `> [!bilgi]` yaz.\n\nSeçtiğin metinde biçim çubuğu çıkar: **kalın**, *eğik*, `kod`, ==vurgu==.', ['rehber'], true, '📘', 'mor'],
+    ['Haftalık rutin şablonu', '# Haftalık rutin\n\nBu sayfayı kendi düzenine göre değiştir.\n\n- **Pzt–Sal:** derin çalışma\n- **Çar:** okuma\n- **Per:** proje\n- **Cum:** toparlama ve gözden geçirme\n- **Her gün:** 20 dk yabancı dil + 3 cümlelik not\n\nYoğun dönemde süreyi kısalt ama **sıfırlama** — süreklilik miktardan önemli.', ['sistem', 'rutin'], true, '🗓️', 'mavi'],
+    ['Sayfa içinde sayfa', '# İç içe yapı\n\nBir sayfanın altına alt sayfa açabilirsin; sol listede ağaç olarak görünür.\n\nBir sayfayı **veritabanına** çevirirsen alt sayfaları satır olur: tablo, liste, pano, galeri ve takvim görünümleriyle bakabilirsin.', ['rehber'], false, '🗂️', 'yeşil'],
     ['Gelen Kutusu · takip edilecekler', 'Buraya sonra bakılacakları at.\nHızlı yakalama (Alt+Q) ile eklediklerin de buraya düşer.', ['gelen-kutusu'], false, '📥', ''],
   ];
   db.pages = noteDefs.map(([title, body, tags, pinned, icon, cover], i) => {

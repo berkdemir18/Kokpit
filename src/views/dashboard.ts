@@ -6,18 +6,16 @@
  * Eski dört büyük sayaç kutusu kaldırıldı; yerine tek satır ince özet geldi.
  */
 
-import { store, db } from '../core/store';
+import { db } from '../core/store';
 import { navigate } from '../core/router';
 import { h, clear } from '../ui/dom';
 import { toast } from '../ui/overlay';
 import {
-  dayKey, streak, habitDays, longDate, shortDate, fmtTime, fmtDT,
-  weekStart, sum, lastDays, parseWhen,
+  dayKey, streak, habitDays, longDate, shortDate, fmtTime, fmtDT, weekStart, parseWhen,
 } from '../core/util';
 import { toggleHabit } from './goals';
 import { addNoteToInbox, openNote } from './notes';
 import { excerptOf } from '../core/pages';
-import { roadmapProgress } from './cyber';
 import { remindersOn, eventsOn, addReminder, completeReminder, overdue } from '../core/reminders';
 
 export function renderDashboard(root: HTMLElement): void {
@@ -43,18 +41,16 @@ const rerender = (): void => {
 /** Dört büyük kutu yerine tek satır: bakınca geçilecek, dikkat çalmayacak. */
 function summaryLine(): HTMLElement {
   const d = db();
-  const rm = roadmapProgress();
-  const byDay = new Map<string, number>();
-  for (const s of d.sessions) byDay.set(s.date, (byDay.get(s.date) ?? 0) + s.minutes);
-  const weekMin = sum(lastDays(7).map((dk) => byDay.get(dk) ?? 0));
+  const live = d.pages.filter((p) => !p.archived);
   const watchedThisWeek = d.titles.filter((t) => t.watchedAt && new Date(t.watchedAt) >= weekStart()).length;
   const bestStreakVal = Math.max(0, ...d.habits.filter((hb) => !hb.archived).map((hb) => streak(habitDays(d.habitLogs, hb.id))));
+  const openGoals = d.goals.filter((g) => g.status === 'active').length;
 
   const cells: [string, string, string, () => void][] = [
-    ['yol haritası', `%${rm.pct}`, 'var(--c-cyber)', () => navigate('cyber')],
-    ['bu hafta siber', `${weekMin} dk`, 'var(--c-cyber)', () => navigate('cyber')],
-    ['seri', `${bestStreakVal} gün`, 'var(--c-goals)', () => navigate('goals')],
     ['bu hafta izlenen', String(watchedThisWeek), 'var(--c-watch)', () => navigate('watch')],
+    ['sayfa', String(live.length), 'var(--c-notes)', () => navigate('notes')],
+    ['seri', `${bestStreakVal} gün`, 'var(--c-goals)', () => navigate('goals')],
+    ['açık hedef', String(openGoals), 'var(--c-goals)', () => navigate('goals')],
   ];
 
   const row = h('div', { class: 'daybar' },
@@ -274,45 +270,9 @@ function todayChecklist(root: HTMLElement): HTMLElement {
     );
   }
 
-  const phases = [...d.phases].sort((a, b) => a.order - b.order);
-  const open: { title: string; code: string; id: string }[] = [];
-  for (const p of phases) {
-    for (const t of d.tasks.filter((x) => x.phaseId === p.id && !x.done).sort((a, b) => a.order - b.order)) {
-      open.push({ title: t.title, code: p.code, id: t.id });
-      if (open.length >= 3) break;
-    }
-    if (open.length >= 3) break;
-  }
-
-  if (open.length) {
-    body.append(h('div', { class: 'line-sep', text: 'yol haritası' }));
-    for (const t of open) {
-      body.append(
-        h('button', {
-          class: 'line-row',
-          onclick: () => { completeRoadmapTask(t.id); renderDashboard(root); },
-        },
-          h('div', { class: 'checkbox' }),
-          h('div', { style: { minWidth: '0' } },
-            h('div', { class: 'ellipsis', style: { fontSize: 'var(--fs-13)' }, text: t.title }),
-            h('div', { class: 'sub-text', text: t.code }),
-          ),
-        ),
-      );
-    }
-  }
-
-  if (!active.length && !open.length) {
-    body.append(h('div', { class: 'empty-state', text: 'Liste boş.' }));
+  if (!active.length) {
+    body.append(h('div', { class: 'empty-state', text: 'Liste boş. Hedefler ekranından alışkanlık ekle.' }));
   }
   card.append(body);
   return card;
-}
-
-function completeRoadmapTask(id: string): void {
-  store.update((d) => {
-    const t = d.tasks.find((x) => x.id === id);
-    if (t) { t.done = true; t.doneAt = dayKey(); }
-  });
-  toast('Görev tamamlandı ✓');
 }
